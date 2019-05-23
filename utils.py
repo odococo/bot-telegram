@@ -9,7 +9,7 @@ class Date:
 
     @classmethod
     def from_millis(cls, millis: int) -> 'Date':
-        return cls(datetime.datetime.fromtimestamp(millis / 1000.0))
+        return cls(datetime.datetime.fromtimestamp(millis))
 
     def __str__(self) -> str:
         return str(self.date)
@@ -57,8 +57,8 @@ class Date:
         }
         return switcher.get(unit, "Unita' non valida")
 
-    def to_string(self, format: str) -> str:
-        return self.date.strftime(format)
+    def to_string(self, format_date: str) -> str:
+        return self.date.strftime(format_date)
 
     def to_date(self) -> str:
         return self.to_string("%Y-%m-%d")
