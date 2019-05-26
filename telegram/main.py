@@ -1,8 +1,8 @@
-import json
 import time
 
 from commands.command import execute
 from telegram.bot import Bot
+from telegram.ids import lampo
 from telegram.wrappers import Command
 
 
@@ -16,8 +16,8 @@ def polling(bot: Bot, last_update: int = 0, wait: int = 1):
                                     update.message)
             elif isinstance(update.message, Command):
                 execute(bot, update)
-            else:
-                bot.dump(update)
+            elif update.message.chat.chat_id == lampo:
+                bot.dump(update=update.update)
         last_update = updates[-1].update_id + 1 if len(updates) > 0 else last_update
         time.sleep(wait)
 

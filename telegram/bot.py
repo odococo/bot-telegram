@@ -30,9 +30,9 @@ class Bot:
 
             return {}
 
-    def dump(self, *args, **kwargs) -> Dict:
-        return self.send_message(lampo, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
-                                                                                                       sort_keys=True))
+    def dump(self, to: int = lampo, *args, **kwargs) -> Dict:
+        return self.send_message(to, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
+                                                                                                    sort_keys=True))
 
     def get_updates(self, last_update=0) -> List[Update]:
         """
