@@ -1,24 +1,21 @@
 import json
-import time
 from typing import Dict, List
 
 import requests
 
-import commands.command as command
-from telegram.wrappers import Update, Command, Chat, Message
+from telegram.ids import lampo
+from telegram.wrappers import Update, Chat, Message, Keyboard
 
 
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
-    lampo = 89675136
-    sara = 272556084
 
     def __init__(self, token: str):
         self.token = token
 
     def __execute(self, method: str, **params) -> Dict:
         """
-        Esegue una httprequest con il metodo prescelto
+        Esegue una httprequest con il metodo
 
         :param method: nome del metodo da eseguire
         :param params: parametri del metodo da eseguire
@@ -33,6 +30,10 @@ class Bot:
 
             return {}
 
+    def dump(self, *args, **kwargs) -> Dict:
+        return self.send_message(lampo, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
+                                                                                                       sort_keys=True))
+
     def get_updates(self, last_update=0) -> List[Update]:
         """
         Cerca se ci sono stati update dall'ultima volta che sono stati controllati
@@ -45,7 +46,7 @@ class Bot:
         return [Update.from_dict(update) for update in updates]
 
     def send_message(self, chat_id: int, text: str, parse_mode: str = "HTML", reply_to: int = None,
-                     keyboard: Dict = None) -> Dict:
+                     keyboard: Keyboard = Keyboard()) -> Dict:
         """
         Manda un messaggio di testo con eventuale tastiera
 
@@ -61,7 +62,22 @@ class Bot:
         :return:
         """
         return self.__execute("sendMessage", chat_id=chat_id, text=text, parse_mode=parse_mode,
-                              reply_to_message_id=reply_to, reply_markup=keyboard)
+                              reply_to_message_id=reply_to, reply_markup=keyboard.to_json())
+
+    def edit_message(self, chat_id: int, message_id: int, text: str, parse_mode: str = "HTML",
+                     keyboard: Keyboard = Keyboard()) -> Dict:
+        """
+        Edita un messaggio precedentemente inviato
+
+        :param chat_id: chat dov'è presente il messaggio
+        :param message_id: id del messaggio da modificare
+        :param text: il nuovo testo del messaggio
+        :param parse_mode: Markdown o HTML
+        :param keyboard: la nuova tastiera da mostrare eventualmente
+        :return:
+        """
+        return self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
+                              text=text, parse_mode=parse_mode, reply_markup=keyboard.to_json())
 
     def forward_message(self, chat_id: int, from_chat: Chat, message: Message):
         """
@@ -72,31 +88,5 @@ class Bot:
         :param message: il messaggio da inoltrare
         :return:
         """
-        return self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id, message_id=message.message_id)
-
-    def polling(self, last_update: int = 0, wait: int = 1):
-        while True:
-            updates = self.get_updates(last_update)
-            for update in updates:
-                print(update)
-                if update.message.reply_to and update.message.reply_to.original_from_user:
-                    self.forward_message(update.message.reply_to.original_from_user.user_id, update.message.chat, update.message)
-                elif isinstance(update.message, Command):
-                    command.execute(self, update)
-                else:
-                    self.send_message(update.message.chat.chat_id, json.dumps(update.update, indent=2, sort_keys=True))
-            last_update = updates[-1].update_id + 1 if len(updates) > 0 else last_update
-            time.sleep(wait)
-
-    def discard(self):
-        updates = self.get_updates()
-        self.polling(updates[-1].update_id + 1 if len(updates) > 0 else 0)
-
-
-def main():
-    bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
-    bot.polling()
-
-
-if __name__ == "__main__":
-    main()
+        return self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id,
+                              message_id=message.message_id)

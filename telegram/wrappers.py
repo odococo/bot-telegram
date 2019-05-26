@@ -1,6 +1,9 @@
+import collections
+import json
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
+from telegram.ids import lampo, sara, lootplus
 from utils import Date
 
 
@@ -79,9 +82,6 @@ class Message:
     original_when: Date
     original_from_user: User
 
-    def to_subclass(self):
-        pass
-
     @staticmethod
     def from_dict(message: Dict) -> 'Message':
         if 'text' in message:
@@ -135,7 +135,7 @@ class TextMessage(Message):
 
 
 @dataclass
-class Command(Message):
+class Command(TextMessage):
     command: str
     params: List[str]
 
@@ -155,11 +155,46 @@ class Command(Message):
         else:
             original_when = None
             original_from_user = None
-        text = str(message['text']).split(" ")
-        command = text[0][1:]
-        params = text[1:]
+        text = message['text']
+        _text = str(message['text']).split(" ")
+        command = _text[0][1:]
+        params = _text[1:]
 
-        return Command(message_id, chat, when, from_user, reply_to, original_when, original_from_user, command, params)
+        return Command(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text, command, params)
+
+
+@dataclass
+class InlineButton:
+    text: str
+    callback_data: str
+
+
+@dataclass
+class URLInlineButton(InlineButton):
+    url: str
+
+
+@dataclass
+class Keyboard:
+    buttons: Dict[int, List[Union[InlineButton]]] = None
+
+    def add(self, row: int, *buttons: Union[InlineButton]):
+        if not self.buttons:
+            self.buttons = collections.OrderedDict()
+        self.buttons.setdefault(row, [])
+        self.buttons[row] += buttons
+
+    def to_dict(self) -> Dict:
+        return {}
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
+
+
+@dataclass
+class InlineKeyboard(Keyboard):
+    def to_dict(self):
+        return {'inline_keyboard': [[vars(button) for button in row] for row in self.buttons.values()]}
 
 
 @dataclass
@@ -170,7 +205,23 @@ class Update:
 
     @staticmethod
     def from_dict(update: Dict) -> 'Update':
+        print(update)
         update_id = update['update_id']
-        message = Message.from_dict(update['message'])
+        if 'message' in update:
+            message = update['message']
+        elif 'edited_message' in update:
+            message = update['edited_message']
+        elif 'callback_query' in update:
+            message = update['callback_query']['message']
+            message['text'] = update['callback_query']['data']
+        else:
+            raise ValueError('Il messaggio non e\' valido {}'.format(update))
+
+        if message['chat']['id'] == sara:
+            message['text'] = "/scrivi " + message.get('text', "")
+        elif message.get('forward_from', {'id': -1})['id'] == lootplus:
+            message['text'] = "/pietre " + message.get('text', "")
+
+        message = Message.from_dict(message)
 
         return Update(update, update_id, message)
