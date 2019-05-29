@@ -1,4 +1,5 @@
 from commands.commands import Command
+from commands.insubria_commands import InsubriaCommands
 from commands.lampo_commands import LampoCommands
 from commands.loot_commands import LootCommands
 from commands.sara_commands import SaraCommands
@@ -12,6 +13,7 @@ def execute(bot: Bot, update: Update):
     command = update.message.command
     default = Command(bot, update)
     standard = Standard(bot, update)
+    insubria = InsubriaCommands(bot, update)
     loot = LootCommands(bot, update)
     lc = LampoCommands(bot, update)
     sc = SaraCommands(bot, update)
@@ -20,6 +22,9 @@ def execute(bot: Bot, update: Update):
     try:
         if hasattr(standard, command):
             c = getattr(standard, command)
+            c()
+        elif hasattr(insubria, command):
+            c = getattr(insubria, command)
             c()
         elif hasattr(loot, command):
             c = getattr(loot, command)
@@ -42,5 +47,5 @@ def execute(bot: Bot, update: Update):
             c = getattr(default, "error")
             c(command)
     except Exception as e:
-        print(e)
+        print(e, e.args)
         getattr(default, "wrong")(c)

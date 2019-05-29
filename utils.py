@@ -1,5 +1,11 @@
 import datetime
+import time
 from dataclasses import dataclass
+
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.remote.webdriver import WebDriver
 
 
 @dataclass
@@ -10,6 +16,10 @@ class Date:
     @classmethod
     def from_millis(cls, millis: int) -> 'Date':
         return cls(datetime.datetime.fromtimestamp(millis))
+
+    @classmethod
+    def now(cls) -> 'Date':
+        return cls(datetime.datetime.now())
 
     def __str__(self) -> str:
         return str(self.date)
@@ -65,3 +75,41 @@ class Date:
 
     def to_time(self) -> str:
         return self.to_string("%H:%M:%S")
+
+
+@dataclass
+class Time:
+    ore: int
+    minuti: int
+    secondi: int
+
+    @classmethod
+    def from_string(cls, string: str):
+        params = string.split(":")
+        ore = int(params[0])
+        minuti = int(params[1])
+        if len(params) > 2:
+            secondi = int(params[2])
+        else:
+            secondi = 0
+
+        return cls(ore, minuti, secondi)
+
+
+@dataclass
+class WebScraper:
+    driver: WebDriver
+
+    @classmethod
+    def chrome(cls):
+        options = Options()
+        options.add_argument("--headless")
+        driver = webdriver.Chrome(options=options)
+
+        return cls(driver)
+
+    def get_page(self, url: str) -> BeautifulSoup:
+        self.driver.get(url)
+        time.sleep(1)
+
+        return BeautifulSoup(self.driver.page_source, "html.parser")

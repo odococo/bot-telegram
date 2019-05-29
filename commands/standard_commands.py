@@ -26,23 +26,32 @@ class Standard(Command):
         if not len(self.params()):
             text = "Specifica il numero di facce:"
             keyboard = InlineKeyboard()
-            keyboard.add(1, InlineButton("6", "/roll 6"), InlineButton("10", "/roll 10"),
-                         InlineButton("20", "/roll 20"))
-            keyboard.add(2, InlineButton("50", "/roll 50"), InlineButton("100", "/roll 100"),
-                         InlineButton("1000", "/roll 1000"))
+            keyboard.add(1,
+                         InlineButton("6", "/{} 6".format(self.command())),
+                         InlineButton("10", "/{} 10".format(self.command())),
+                         InlineButton("20", "/{} 20".format(self.command())))
+            keyboard.add(2,
+                         InlineButton("50", "/{} 50".format(self.command())),
+                         InlineButton("100", "/{} 100".format(self.command())),
+                         InlineButton("1000", "/{} 1000".format(self.command())))
 
             return self.answer(text, keyboard)
         elif len(self.params()) == 1:
             facce = int(self.params()[0])
             text = "Specifica il numero di lanci:"
             keyboard = InlineKeyboard()
-            keyboard.add(1, InlineButton("1", "/roll {} 1".format(facce)),
-                         InlineButton("2", "/roll {} 2".format(facce)), InlineButton("3", "/roll {} 3".format(facce)))
-            keyboard.add(2, InlineButton("4", "/roll {} 4".format(facce)),
-                         InlineButton("5", "/roll {} 5".format(facce)),
-                         InlineButton("6", "/roll {} 6".format(facce)))
-            keyboard.add(3, InlineButton("7", "/roll {} 7".format(facce)),
-                         InlineButton("8", "/roll {} 8".format(facce)), InlineButton("9", "/roll {} 9".format(facce)))
+            keyboard.add(1,
+                         InlineButton("1", "/{} {} 1".format(self.command(), facce)),
+                         InlineButton("2", "/{} {} 2".format(self.command(), facce)),
+                         InlineButton("3", "/{} {} 3".format(self.command(), facce)))
+            keyboard.add(2,
+                         InlineButton("4", "/{} {} 4".format(self.command(), facce)),
+                         InlineButton("5", "/{} {} 5".format(self.command(), facce)),
+                         InlineButton("6", "/{} {} 6".format(self.command(), facce)))
+            keyboard.add(3,
+                         InlineButton("7", "/{} {} 7".format(self.command(), facce)),
+                         InlineButton("8", "/{} {} 8".format(self.command(), facce)),
+                         InlineButton("9", "/{} {} 9".format(self.command(), facce)))
 
             return self.replace(text, keyboard)
         else:

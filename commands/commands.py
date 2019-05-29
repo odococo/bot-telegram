@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 from typing import List, Dict, Callable
 
@@ -10,6 +11,9 @@ from telegram.wrappers import Update, Keyboard
 class Command:
     bot: Bot
     update: Update
+
+    def command(self):
+        return self.update.message.command
 
     def params(self) -> List[str]:
         return self.update.message.params
