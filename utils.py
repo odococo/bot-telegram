@@ -85,6 +85,27 @@ class Time:
     minuti: int
     secondi: int
 
+    def __eq__(self, other) -> bool:
+        return self.ore == other.ore and self.minuti == other.minuti and self.secondi == other.secondi
+
+    def __gt__(self, other) -> bool:
+        if self == other:
+            return False
+        elif self.ore < other.ore:
+            return False
+        elif self.ore == other.ore and self.minuti < other.minuti:
+            return False
+        elif self.ore == other.ore and self.minuti == other.minuti and self.secondi < other.secondi:
+            return False
+        else:
+            return True
+
+    def __ge__(self, other) -> bool:
+        return self == other or self > other
+
+    def __str__(self) -> str:
+        return "{}:{}".format(self.ore, self.minuti)
+
     @classmethod
     def from_string(cls, string: str):
         params = string.split(":")
@@ -96,6 +117,12 @@ class Time:
             secondi = 0
 
         return cls(ore, minuti, secondi)
+
+    @classmethod
+    def now(cls):
+        adesso = datetime.datetime.now()
+
+        return cls(adesso.hour, adesso.minute, adesso.second)
 
 
 @dataclass

@@ -27,7 +27,7 @@ class _Lezione:
         return hash(self.corso)
 
 
-def get_aula(aula: bs4.element.Tag) -> Dict[str, List[_Lezione]]:
+def _get_aula(aula: bs4.element.Tag) -> Dict[str, List[_Lezione]]:
     lezioni = [lezione.find('div') for lezione in
                aula.find_all('td', {'class': "filled"})]  # trovo tutte le aule in cui c'e' una lezione
     nome_aula = lezioni[0].text
@@ -76,7 +76,7 @@ class InsubriaCommands(Command):
                 lezioni = []
                 aule = timeline.find_all('tr')
                 for i in range(1, len(aule)):
-                    lezioni.append(get_aula(aule[i]))
+                    lezioni.append(_get_aula(aule[i]))
 
                 if len(lezioni) > 0:
                     edifici[edificio] = {
@@ -92,29 +92,28 @@ class InsubriaCommands(Command):
 
             text = ""
             for lezioni in edifici[edificio]['lezioni']:
-                now = Date.now()
+                now = Time.now()
+                free = True
                 stato = ""
                 if not len(lezioni['lezioni']):
-                    stato = "libera tutto il giorno"
+                    stato = "libera fino a fine giornata"
                 for j, lezione in enumerate(lezioni['lezioni']):
-                    if now.date.hour > lezione.start.ore and now.date.hour > lezione.end.ore:
-                        if j + 1 > len(lezioni['lezioni']):
-                            stato = "libera dalle {} fino a fine giornata".format(lezione.end.ore)
-                            break
-                        elif now.date.hour < lezioni['lezioni'][j + 1].start.ore:
-                            stato = "libera da adesso fino alle {}".format(lezioni['lezioni'][j + 1].start.ore)
-                            break
+                    if now >= lezione.start:
+                        if not lezione.corso:
+                            stato = "aula studio"
+                        elif now >= lezione.end:
+                            stato = "libera fino a fine giornata"
                         else:
+                            stato = "occupata fino alle {}".format(lezione.end)
+                            free = False
                             break
-                    elif now.date.hour < lezione.start.ore:
-                        stato = "libera da adesso fino alle {}".format(lezione.start.ore)
-                        break
+                    elif lezione.corso:  # prossima lezione
+                        stato = "libera fino alle {}".format(lezione.start)
                     else:
-                        break
-                if stato:
+                        stato = "aula studio"
+                if free:
                     text += "\u2705 {} {}\n".format(lezioni['nome'], stato)  # aula libera per ora
                 else:
                     text += "\u274c {} occupata\n".format(lezioni['nome'])
-
 
             return self.replace(text)
