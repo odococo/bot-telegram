@@ -79,7 +79,7 @@ class InsubriaCommands(Command):
                         'lezioni': lezioni  # lista di aule
                     }
                 else:
-                    self.replace("Errore caricamento timeline. Riprova!")
+                    return self.replace("Errore caricamento timeline. Riprova!")
                 scraper.quit()
 
             text = ""
