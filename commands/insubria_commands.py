@@ -66,7 +66,7 @@ class InsubriaCommands(Command):
 
                 scraper = WebScraper.firefox()
                 timeline = scraper.get_page(url.format(edificio))
-                self.replace("Estrapolo le lezioni...")
+                self.replace("Elaboro i dati...")
 
                 lezioni = []
                 aule = timeline.find_all('tr')
@@ -78,7 +78,8 @@ class InsubriaCommands(Command):
                         'data': Date.now(),
                         'lezioni': lezioni  # lista di aule
                     }
-                self.replace("Elaboro i dati...")
+                else:
+                    self.replace("Errore caricamento timeline. Riprova!")
                 scraper.quit()
 
             text = ""
@@ -106,7 +107,6 @@ class InsubriaCommands(Command):
                     text += "\u2705 {} {}\n".format(lezioni['nome'], stato)  # aula libera per ora
                 else:
                     text += "\u274c {} occupata\n".format(lezioni['nome'])
-            if not text:
-                text = "Errore caricamento timeline. Riprova!"
+
 
             return self.replace(text)
