@@ -9,6 +9,8 @@ from utils import WebScraper, Date, Time
 
 edifici: Dict = {}
 
+tries = 1
+
 
 @dataclass
 class _Lezione:
@@ -58,6 +60,9 @@ class InsubriaCommands(Command):
 
             return self.answer("Scegli l'edificio:", keyboard)
         else:
+            global edifici
+            global tries
+
             url = "http://timeline.uninsubria.it/browse.php?sede={}"
             edificio = self.params()[0]
             if edificio not in edifici or edifici[edificio]['data'].date.day != Date.now().date.day:
@@ -65,7 +70,7 @@ class InsubriaCommands(Command):
                 self.replace("Consulto la timeline...")
 
                 scraper = WebScraper.firefox()
-                timeline = scraper.get_page(url.format(edificio))
+                timeline = scraper.get_page(url.format(edificio), tries)
                 self.replace("Elaboro i dati...")
 
                 lezioni = []
@@ -78,7 +83,10 @@ class InsubriaCommands(Command):
                         'data': Date.now(),
                         'lezioni': lezioni  # lista di aule
                     }
+                    tries = 1
                 else:
+                    tries += 1
+
                     return self.replace("Errore caricamento timeline. Riprova!")
                 scraper.quit()
 

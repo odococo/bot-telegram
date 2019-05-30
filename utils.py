@@ -122,9 +122,9 @@ class WebScraper:
 
         return cls(driver)
 
-    def get_page(self, url: str) -> BeautifulSoup:
+    def get_page(self, url: str, wait: int = 1) -> BeautifulSoup:
         self.driver.get(url)
-        time.sleep(1)  # attesa per caricare la pagina
+        time.sleep(wait)  # attesa per caricare la pagina
 
         return BeautifulSoup(self.driver.page_source, "html.parser")
 
