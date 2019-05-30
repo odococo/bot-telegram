@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
-from telegram.ids import lampo, sara, lootplus
+from telegram.ids import sara, lootplus
 from utils import Date
 
 
@@ -12,8 +12,8 @@ class Chat:
     chat_id: int
     username: str
 
-    @staticmethod
-    def from_dict(chat: Dict) -> 'Chat':
+    @classmethod
+    def from_dict(cls, chat: Dict) -> 'Chat':
         if chat['type'] == "private":
             return PrivateChat.from_dict(chat)
         elif chat['type'] == 'group' or chat['type'] == 'supergroup':
@@ -22,7 +22,7 @@ class Chat:
             chat_id = chat['id']
             username = chat.get('username', '')
 
-            return Chat(chat_id, username)
+            return cls(chat_id, username)
 
 
 @dataclass
@@ -30,14 +30,14 @@ class PrivateChat(Chat):
     first_name: str
     last_name: str
 
-    @staticmethod
-    def from_dict(chat: Dict) -> 'PrivateChat':
+    @classmethod
+    def from_dict(cls, chat: Dict) -> 'PrivateChat':
         chat_id = chat['id']
         first_name = chat['first_name']
         last_name = chat.get('last_name', '')
         username = chat.get('username', '')
 
-        return PrivateChat(chat_id, first_name, last_name, username)
+        return cls(chat_id, first_name, last_name, username)
 
 
 @dataclass
@@ -45,14 +45,14 @@ class GroupChat(Chat):
     title: str
     supergroup: bool
 
-    @staticmethod
-    def from_dict(chat: Dict) -> 'GroupChat':
+    @classmethod
+    def from_dict(cls, chat: Dict) -> 'GroupChat':
         chat_id = chat['id']
         title = chat['title']
         supergroup = chat['type'] == "supergroup"
         username = chat.get('username', '')
 
-        return GroupChat(chat_id, title, supergroup, username)
+        return cls(chat_id, title, supergroup, username)
 
 
 @dataclass
@@ -62,14 +62,14 @@ class User:
     last_name: str
     username: str
 
-    @staticmethod
-    def from_dict(user: Dict) -> 'User':
+    @classmethod
+    def from_dict(cls, user: Dict) -> 'User':
         user_id = user['id']
         first_name = user['first_name']
         last_name = user.get('last_name', '')
         username = user.get('username', '')
 
-        return User(user_id, first_name, last_name, username)
+        return cls(user_id, first_name, last_name, username)
 
 
 @dataclass
@@ -82,8 +82,8 @@ class Message:
     original_when: Date
     original_from_user: User
 
-    @staticmethod
-    def from_dict(message: Dict) -> 'Message':
+    @classmethod
+    def from_dict(cls, message: Dict) -> 'Message':
         if 'text' in message:
             text = message['text']
             if text[0] == "." or text[0] == "!" or text[0] == "/":
@@ -106,15 +106,15 @@ class Message:
                 original_when = None
                 original_from_user = None
 
-            return Message(message_id, chat, when, from_user, reply_to, original_when, original_from_user)
+            return cls(message_id, chat, when, from_user, reply_to, original_when, original_from_user)
 
 
 @dataclass
 class TextMessage(Message):
     text: str
 
-    @staticmethod
-    def from_dict(message: Dict) -> 'TextMessage':
+    @classmethod
+    def from_dict(cls, message: Dict) -> 'TextMessage':
         message_id = message['message_id']
         chat = Chat.from_dict(message['chat'])
         when = Date.from_millis(message['date'])
@@ -131,7 +131,7 @@ class TextMessage(Message):
             original_when = None
             original_from_user = None
 
-        return TextMessage(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text)
+        return cls(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text)
 
 
 @dataclass
@@ -139,8 +139,8 @@ class Command(TextMessage):
     command: str
     params: List[str]
 
-    @staticmethod
-    def from_dict(message: Dict) -> 'Command':
+    @classmethod
+    def from_dict(cls, message: Dict) -> 'Command':
         message_id = message['message_id']
         chat = Chat.from_dict(message['chat'])
         when = Date.from_millis(message['date'])
@@ -160,7 +160,8 @@ class Command(TextMessage):
         command = _text[0][1:]
         params = _text[1:]
 
-        return Command(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text, command, params)
+        return cls(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text, command,
+                   params)
 
 
 @dataclass
@@ -203,8 +204,8 @@ class Update:
     update_id: int
     message: Union[Message, TextMessage, Command]
 
-    @staticmethod
-    def from_dict(update: Dict) -> 'Update':
+    @classmethod
+    def from_dict(cls, update: Dict) -> 'Update':
         print(update)
         update_id = update['update_id']
         if 'message' in update:
@@ -224,4 +225,4 @@ class Update:
 
         message = Message.from_dict(message)
 
-        return Update(update, update_id, message)
+        return cls(update, update_id, message)

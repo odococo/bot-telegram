@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
@@ -102,9 +103,17 @@ class WebScraper:
 
     @classmethod
     def chrome(cls):
-        options = Options()
-        options.add_argument("--headless")
+        options = ChromeOptions()
+        options.headless = True
         driver = webdriver.Chrome(options=options)
+
+        return cls(driver)
+
+    @classmethod
+    def firefox(cls):
+        options = FirefoxOptions()
+        options.headless = True
+        driver = webdriver.Firefox(options=options)
 
         return cls(driver)
 
@@ -113,3 +122,6 @@ class WebScraper:
         time.sleep(1)
 
         return BeautifulSoup(self.driver.page_source, "html.parser")
+
+    def quit(self):
+        self.driver.quit()
