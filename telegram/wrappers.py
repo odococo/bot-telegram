@@ -206,7 +206,6 @@ class Update:
 
     @classmethod
     def from_dict(cls, update: Dict) -> 'Update':
-        print(update)
         update_id = update['update_id']
         if 'message' in update:
             message = update['message']
