@@ -10,7 +10,6 @@ def polling(bot: Bot, last_update: int = 0, wait: int = 1):
     while True:
         updates = bot.get_updates(last_update)
         for update in updates:
-            print(update)
             if update.message.reply_to and update.message.reply_to.original_from_user:
                 bot.forward_message(update.message.reply_to.original_from_user.user_id, update.message.chat,
                                     update.message)

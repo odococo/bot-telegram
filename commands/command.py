@@ -47,5 +47,5 @@ def execute(bot: Bot, update: Update):
             c = getattr(default, "error")
             c(command)
     except Exception as e:
-        print(e, e.args)
+        print(e, e.with_traceback())
         getattr(default, "wrong")(c)
