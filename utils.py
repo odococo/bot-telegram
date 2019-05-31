@@ -103,8 +103,17 @@ class Time:
     def __ge__(self, other) -> bool:
         return self == other or self > other
 
+    def __le__(self, other):
+        return not self > other
+
+    def __lt__(self, other):
+        return not self >= other
+
+    def __ne__(self, other):
+        return not self == other
+
     def __str__(self) -> str:
-        return "{}:{}".format(self.ore, self.minuti)
+        return "{:02d}:{:02d}".format(self.ore, self.minuti)
 
     @classmethod
     def from_string(cls, string: str):
@@ -146,6 +155,12 @@ class WebScraper:
         display = Display(visible=0, size=(800, 600))
         display.start()
         driver = webdriver.Firefox(options=options)
+
+        return cls(driver)
+
+    @classmethod
+    def phantomjs(cls):
+        driver = webdriver.PhantomJS()
 
         return cls(driver)
 
