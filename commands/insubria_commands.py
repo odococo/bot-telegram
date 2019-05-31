@@ -59,7 +59,7 @@ class InsubriaCommands(Command):
             url = "http://timeline.uninsubria.it/browse.php?sede={}"
             self.replace("Consulto la timeline...")
 
-            scraper = WebScraper.chrome()
+            scraper = WebScraper.firefox()
             timeline = scraper.get_page(url.format(edificio), tries)
             self.replace("Elaboro i dati...")
 
