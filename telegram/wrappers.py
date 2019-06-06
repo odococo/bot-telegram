@@ -88,6 +88,14 @@ class Message:
             text = message['text']
             if text[0] == "." or text[0] == "!" or text[0] == "/":
                 return Command.from_dict(message)
+            elif message['chat']['id'] == sara:
+                message['text'] = "/scrivi " + message.get('text', "")
+
+                return Command.from_dict(message)
+            elif message.get('forward_from', {'id': -1})['id'] == lootplus:
+                message['text'] = "/pietre " + message.get('text', "")
+
+                return Command.from_dict(message)
             else:
                 return TextMessage.from_dict(message)
         else:
@@ -156,7 +164,7 @@ class Command(TextMessage):
             original_when = None
             original_from_user = None
         text = message['text']
-        _text = str(message['text']).split(" ")
+        _text = str(message['text']).split()
         command = _text[0][1:]
         params = _text[1:]
 
@@ -216,11 +224,6 @@ class Update:
             message['text'] = update['callback_query']['data']
         else:
             raise ValueError('Il messaggio non e\' valido {}'.format(update))
-
-        if message['chat']['id'] == sara:
-            message['text'] = "/scrivi " + message.get('text', "")
-        elif message.get('forward_from', {'id': -1})['id'] == lootplus:
-            message['text'] = "/pietre " + message.get('text', "")
 
         message = Message.from_dict(message)
 

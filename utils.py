@@ -82,8 +82,8 @@ class Date:
 @dataclass
 class Time:
     ore: int
-    minuti: int
-    secondi: int
+    minuti: int = 0
+    secondi: int = 0
 
     def __eq__(self, other) -> bool:
         return self.ore == other.ore and self.minuti == other.minuti and self.secondi == other.secondi
@@ -119,7 +119,10 @@ class Time:
     def from_string(cls, string: str):
         params = string.split(":")
         ore = int(params[0])
-        minuti = int(params[1])
+        if len(params) > 1:
+            minuti = int(params[1])
+        else:
+            minuti = 0
         if len(params) > 2:
             secondi = int(params[2])
         else:
@@ -172,3 +175,9 @@ class WebScraper:
 
     def quit(self):
         self.driver.quit()
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
