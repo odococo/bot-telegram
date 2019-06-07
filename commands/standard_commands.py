@@ -1,4 +1,6 @@
+import json
 import random
+import unicodedata as ucd
 from dataclasses import dataclass
 from typing import Dict
 
@@ -9,7 +11,7 @@ from telegram.wrappers import InlineKeyboard, InlineButton
 @dataclass
 class Standard(Command):
     def echo(self) -> Dict:
-        return self.answer("To you from you: " + " ".join(self.update.message.params))
+        return self.answer("To you from you: {}".format(" ".join(self.params())))
 
     def random(self) -> Dict:
         """
@@ -62,3 +64,20 @@ class Standard(Command):
                                enumerate(random.choices(range(1, facce), k=lanci))])
 
             return self.replace(text)
+
+    def utf(self) -> Dict:
+        string = " ".join(self.params())
+
+        return self.answer(
+            "\n".join(["Input: {}\nCodifica: {}\nCode point: {}\nNome: {}\nCategoria: {}".format(
+                carattere, ord(carattere), json.dumps(carattere), ucd.name(carattere), ucd.category(carattere))
+                for carattere in string]))
+
+    def string(self) -> Dict:
+        codice = self.params()[0]
+
+        if codice.isdigit():  # codice unicode
+            return self.answer("Il carattere corrispondente a {} è {}".format(codice, chr(int(codice))))
+        else:  # codifica unicode \u...
+            return self.answer(
+                "Il carattere corrispondente a {} è {}".format(codice, codice.encode('utf-8').decode('unicode_escape')))
