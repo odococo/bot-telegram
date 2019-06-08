@@ -1,5 +1,7 @@
 import time
 
+import requests
+
 from commands.command import execute
 from telegram.bot import Bot
 from telegram.ids import lampo
@@ -27,8 +29,12 @@ def discard(bot: Bot):
 
 
 def main():
-    bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
-    polling(bot)
+    try:
+        bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
+        polling(bot)
+    except requests.exceptions.ConnectionError:
+        time.sleep(1)
+        main()
 
 
 if __name__ == "__main__":
