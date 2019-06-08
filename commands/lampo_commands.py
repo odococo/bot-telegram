@@ -6,19 +6,74 @@ from commands.commands import Command
 from telegram.ids import sara, lampo
 
 traduzioni = {
-    'nuk ka gje': "prego formale",
-    'natën': "notte",
-    'natën mir': "buonanotte",
-    'faleminderit': "grazie",
-    'ska gje': "prego",
     'çfarë dreqin po thua': "che diavolo stai dicendo",
+
+    'faleminderit': "grazie",
+    'nuk ka gje': "prego formale",
+    'ska gje': "prego",
+
+    'natën': "notte",
+    'natën e mir': "buonanotte",
+    'mirëdita': "buongiorno",
     'çkemi': "ciao",
+    'përshëndetje': "salve",
+
+    'si je?': "come stai?",
     'mir': "bene",
     'keq': "male",
     'jo': "no",
     'po': "sì",
+
+    'si': "come",
+
     'te dua': "ti amo",
-    'mirëdita': "buongiorno"
+    'shpirt': "tesoro",
+    'zëmre': "amore",
+
+    'dua gjumë': "voglio sonno",
+    'uri': "fame",
+    'caldo': "vapa",
+    'ftoht': "freddo",
+
+    'un': "io",
+    'ti': "tu",
+    'aji': "lui",
+    'ajo': "lei",
+    'neve': "noi",
+    'juve': "voi",
+    'ata': "loro",
+    'un kam': "io ho",
+    'ti ke': "tu hai",
+    'aji ka': "lui ha",
+    'ajo ka': "lei ha",
+    'neve kemi': "noi abbiamo",
+    'juve keni': "voi avete",
+    'ata kan': "loro hanno",
+    'un dua': "io voglio",
+    'ti do': "tu vuoi",
+    'aji do': "lui vuole",
+    'ajo do': "lei vuole",
+    'neve duam': "noi vogliamo",
+    'juve doni': "voi volete",
+    'ata duan': "loro vogliono'",
+    'un jam': "io sono",
+    'ti je': "tu sei",
+    'aji është': "lui è",
+    'ajo është': "lei è",
+    'neve jemi': "noi siamo",
+    'juve jeni': "voi siete",
+    'ata jan': "loro sono",
+
+    'zero': "zero",
+    'nje': "uno",
+    'dy': "due",
+    'tre': "tre",
+    'katër': "quattro",
+    'pes': "cinque",
+    'gjasht': "sei",
+    'shtat': "sette",
+    'tet': "otto",
+    'nënt': "nove"
 }
 
 
