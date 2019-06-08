@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
 from commands.commands import Command
+from telegram.wrappers import Message
 
 
 @dataclass
 class LootCommands(Command):
-    def pietre(self):
+    def pietre(self) -> Message:
         valori_pietre = {
             'Pietra Anima di Legno': 1,
             'Pietra Anima di Ferro': 2,

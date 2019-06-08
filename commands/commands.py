@@ -1,10 +1,9 @@
-import time
 from dataclasses import dataclass
 from typing import List, Dict, Callable
 
 from telegram.bot import Bot
 from telegram.ids import lampo
-from telegram.wrappers import Update, Keyboard
+from telegram.wrappers import Update, Keyboard, Message
 
 
 @dataclass
@@ -18,7 +17,7 @@ class Command:
     def params(self) -> List[str]:
         return self.update.message.params
 
-    def answer(self, text: str, keyboard: Keyboard = Keyboard()) -> Dict:
+    def answer(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:
         """
         Risponde all'utente che ha eseguito il comando
 
@@ -29,7 +28,7 @@ class Command:
         return self.bot.send_message(chat_id=self.update.message.chat.chat_id, text=text,
                                      reply_to=self.update.message.message_id, keyboard=keyboard)
 
-    def replace(self, text: str, keyboard: Keyboard = Keyboard()) -> Dict:
+    def replace(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:
         """
         Rimpiazza il precedente messaggio
 
@@ -37,15 +36,14 @@ class Command:
         :param keyboard: la nuova eventuale tastiera
         :return:
         """
-        result = self.bot.edit_message(chat_id=self.update.message.chat.chat_id,
-                                       message_id=self.update.message.message_id,
-                                       text=text, keyboard=keyboard)
-        return result if result else self.answer(text, keyboard)
+        return self.bot.edit_message(chat_id=self.update.message.chat.chat_id,
+                                     message_id=self.update.message.message_id,
+                                     text=text, keyboard=keyboard)
 
-    def error(self, command: str) -> Dict:
+    def error(self, command: str) -> Message:
         return self.answer("Il comando {} non esiste!".format(command))
 
-    def wrong(self, command: Callable[[], Dict]) -> Dict:
+    def wrong(self, command: Callable[[], Dict]) -> Message:
         if not command.__doc__:
             self.bot.send_message(chat_id=lampo, text="Il comando {} non ha una doc!".format(command.__name__))
         return self.answer(

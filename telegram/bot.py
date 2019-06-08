@@ -6,6 +6,8 @@ import requests
 from telegram.ids import lampo
 from telegram.wrappers import Update, Chat, Message, Keyboard
 
+max_length = 2048
+
 
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
@@ -30,7 +32,7 @@ class Bot:
 
             return {}
 
-    def dump(self, to: int = lampo, *args, **kwargs) -> Dict:
+    def dump(self, to: int = lampo, *args, **kwargs) -> Message:
         return self.send_message(to, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
                                                                                                     sort_keys=True))
 
@@ -46,7 +48,7 @@ class Bot:
         return [Update.from_dict(update) for update in updates]
 
     def send_message(self, chat_id: int, text: str, parse_mode: str = "HTML", reply_to: int = None,
-                     keyboard: Keyboard = Keyboard()) -> Dict:
+                     keyboard: Keyboard = Keyboard()) -> Message:
         """
         Manda un messaggio di testo con eventuale tastiera
 
@@ -61,11 +63,21 @@ class Bot:
         :param keyboard: tastiera da mostrare eventualmente
         :return:
         """
-        return self.__execute("sendMessage", chat_id=chat_id, text=text, parse_mode=parse_mode,
-                              reply_to_message_id=reply_to, reply_markup=keyboard.to_json())
+        while len(text) > max_length:
+            index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
+            index = index if index > 0 else len(text)
+            result = Message.from_dict(
+                self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
+                               parse_mode=parse_mode, reply_to_message_id=reply_to))
+            text = text[index:]
+            reply_to = result.message_id if result.message_id else None
+
+        return Message.from_dict(
+            self.__execute("sendMessage", chat_id=chat_id, text=text,
+                           parse_mode=parse_mode, reply_to_message_id=reply_to, reply_markup=keyboard.to_json()))
 
     def edit_message(self, chat_id: int, message_id: int, text: str, parse_mode: str = "HTML",
-                     keyboard: Keyboard = Keyboard()) -> Dict:
+                     keyboard: Keyboard = Keyboard()) -> Message:
         """
         Edita un messaggio precedentemente inviato
 
@@ -76,10 +88,18 @@ class Bot:
         :param keyboard: la nuova tastiera da mostrare eventualmente
         :return:
         """
-        return self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
-                              text=text, parse_mode=parse_mode, reply_markup=keyboard.to_json())
+        result = Message.from_dict(self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
+                                                  text=text[:max_length], parse_mode=parse_mode,
+                                                  reply_markup=keyboard.to_json()))
+        if not result.message_id:
+            return self.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode, keyboard=keyboard)
+        elif len(text) > max_length:
+            return self.send_message(chat_id=chat_id, text=text[max_length:], parse_mode=parse_mode,
+                                     reply_to=result.message_id)
+        else:
+            return result
 
-    def forward_message(self, chat_id: int, from_chat: Chat, message: Message):
+    def forward_message(self, chat_id: int, from_chat: Chat, message: Message) -> Message:
         """
         Inoltra un messaggio
 
@@ -88,5 +108,5 @@ class Bot:
         :param message: il messaggio da inoltrare
         :return:
         """
-        return self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id,
-                              message_id=message.message_id)
+        return Message.from_dict(self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id,
+                                                message_id=message.message_id))

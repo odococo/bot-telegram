@@ -4,7 +4,7 @@ from typing import Dict, List
 import bs4
 
 from commands.commands import Command
-from telegram.wrappers import InlineKeyboard, InlineButton
+from telegram.wrappers import InlineKeyboard, InlineButton, Message
 from utils import WebScraper, Date, Time, chunks
 
 edifici: Dict = {}
@@ -82,7 +82,7 @@ class InsubriaCommands(Command):
 
         return True
 
-    def aule(self) -> Dict:
+    def aule(self) -> Message:
         if not len(self.params()):
             keyboard = InlineKeyboard()
             keyboard.add(1, InlineButton("Monte generoso", "/{} mtg".format(self.command())))
@@ -138,7 +138,7 @@ class InsubriaCommands(Command):
 
             return self.replace(text)
 
-    def timeline(self) -> Dict:
+    def timeline(self) -> Message:
         if not len(self.params()):
             keyboard = InlineKeyboard()
             keyboard.add(1, InlineButton("Monte generoso", "/{} mtg".format(self.command())))

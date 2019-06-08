@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-from typing import Dict
 
 from commands.command import Command
 from telegram.ids import lampo
+from telegram.wrappers import Message
 
 
 @dataclass
 class SaraCommands(Command):
-    def scrivi(self) -> Dict:
+    def scrivi(self) -> Message:
         return self.bot.forward_message(lampo, self.update.message.chat, self.update.message)
 
-    def tesoro(self, command: str) -> Dict:
+    def tesoro(self, command: str) -> Message:
         return self.answer("Tesoro, il comando {} non l'ho ancora implementato".format(command))

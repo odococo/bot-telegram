@@ -2,18 +2,17 @@ import json
 import random
 import unicodedata as ucd
 from dataclasses import dataclass
-from typing import Dict
 
 from commands.commands import Command
-from telegram.wrappers import InlineKeyboard, InlineButton
+from telegram.wrappers import InlineKeyboard, InlineButton, Message
 
 
 @dataclass
 class Standard(Command):
-    def echo(self) -> Dict:
+    def echo(self) -> Message:
         return self.answer("To you from you: {}".format(" ".join(self.params())))
 
-    def random(self) -> Dict:
+    def random(self) -> Message:
         """
         Estrae 1 numero random tra min (intero) e max (intero
 
@@ -24,7 +23,7 @@ class Standard(Command):
 
         return self.answer(str(random.randint(min_value, max_value)))
 
-    def roll(self) -> Dict:
+    def roll(self) -> Message:
         if not len(self.params()):
             text = "Specifica il numero di facce:"
             keyboard = InlineKeyboard()
@@ -65,7 +64,7 @@ class Standard(Command):
 
             return self.replace(text)
 
-    def utf(self) -> Dict:
+    def utf(self) -> Message:
         string = " ".join(self.params())
 
         return self.answer(
@@ -73,7 +72,7 @@ class Standard(Command):
                 carattere, ord(carattere), json.dumps(carattere), ucd.name(carattere), ucd.category(carattere))
                 for carattere in string]))
 
-    def string(self) -> Dict:
+    def string(self) -> Message:
         codice = self.params()[0]
 
         if codice.isdigit():  # codice unicode

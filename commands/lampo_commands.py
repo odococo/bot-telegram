@@ -1,9 +1,9 @@
 import unicodedata
 from dataclasses import dataclass
-from typing import Dict
 
 from commands.commands import Command
 from telegram.ids import sara, lampo
+from telegram.wrappers import Message
 
 traduzioni = {
     'çfarë dreqin po thua': "che diavolo stai dicendo",
@@ -55,7 +55,7 @@ traduzioni = {
     'ajo do': "lei vuole",
     'neve duam': "noi vogliamo",
     'juve doni': "voi volete",
-    'ata duan': "loro vogliono'",
+    'ata duan': "loro vogliono",
     'un jam': "io sono",
     'ti je': "tu sei",
     'aji është': "lui è",
@@ -79,13 +79,13 @@ traduzioni = {
 
 @dataclass
 class LampoCommands(Command):
-    def scrivi(self) -> Dict:
+    def scrivi(self) -> Message:
         return self.bot.forward_message(sara, self.update.message.chat, self.update.message)
 
-    def test(self) -> Dict:
+    def test(self) -> Message:
         return self.bot.forward_message(lampo, self.update.message.chat, self.update.message)
 
-    def traduci(self) -> Dict:
+    def traduci(self) -> Message:
         lingua = self.params()[0]
         parola = " ".join(self.params()[1:])
 
