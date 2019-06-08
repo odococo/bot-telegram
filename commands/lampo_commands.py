@@ -8,9 +8,17 @@ from telegram.ids import sara, lampo
 traduzioni = {
     'nuk ka gje': "prego formale",
     'natën': "notte",
+    'natën mir': "buonanotte",
     'faleminderit': "grazie",
     'ska gje': "prego",
-    'çfarë dreqesh po thua': "che diavolo stai dicendo",
+    'çfarë dreqin po thua': "che diavolo stai dicendo",
+    'çkemi': "ciao",
+    'mir': "bene",
+    'keq': "male",
+    'jo': "no",
+    'po': "sì",
+    'te dua': "ti amo",
+    'mirëdita': "buongiorno"
 }
 
 
@@ -27,9 +35,12 @@ class LampoCommands(Command):
         parola = " ".join(self.params()[1:])
 
         if lingua == "it":
-            parole = ["{} --> <code>{}</code>".format(it, al) for al, it in traduzioni.items() if parola in it]
+            parole = ["<strong>{}</strong> --> <code>{}</code>".format(it, al) for al, it in traduzioni.items() if parola in it]
         else:
-            parole = ["{} --> {}".format(al, it) for al, it in traduzioni.items() if
+            parole = ["<strong>{}</strong> --> <code>{}</code>".format(al, it) for al, it in traduzioni.items() if
                       parola in al or parola in str(unicodedata.normalize('NFKD', al).encode('ascii', 'ignore'))]
 
-        return self.answer("Le traduzioni che contengono {} sono: \n{}".format(parola, "\n".join(parole)))
+        if len(parole):
+            return self.answer("Le traduzioni che contengono {} sono: \n{}".format(parola, "\n".join(parole)))
+        else:
+            return self.answer("Non ci sono traduzioni per {}".format(parola))
