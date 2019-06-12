@@ -51,9 +51,9 @@ class Cron(Command):
         return self.answer("Il cronjob è stato correttamente settato con id: <code>{}</code>".format(job_id))
 
     def getavvisi(self) -> Message:
-        if self.from_user() in jobs:
+        if self.from_user() in jobs and jobs[self.from_user()]:
             text = "Lista avvisi:\n"
-            avvisi = "\n". join(["Avviso: {}".format(job) for job in jobs[self.from_user()]])
+            avvisi = "\n". join(["Avviso: <code>{}</code>".format(job) for job in jobs[self.from_user()]])
 
             return self.answer(text + avvisi)
         else:

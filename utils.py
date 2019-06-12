@@ -23,7 +23,7 @@ class DateTime(dt.datetime):
         return cls(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second)
 
     @classmethod
-    def from_string(cls, datetime: str, dt_format: str = "%y-%m-%d %H:%M:%S") -> Union['DateTime', 'Date', 'Time']:
+    def from_string(cls, datetime: str, dt_format: str = "%y-%m-%d %H:%M:%S.%f") -> Union['DateTime', 'Date', 'Time']:
         return cls.from_datetime(dt.datetime.strptime(datetime, dt_format))
 
     @classmethod
@@ -32,7 +32,9 @@ class DateTime(dt.datetime):
 
     @classmethod
     def by_now(cls):
-        return super().__new__()
+        now = dt.datetime.now()
+
+        return cls.from_datetime(now)
 
     def datetime(self) -> str:
         return super().__str__()
@@ -99,7 +101,7 @@ class Date(DateTime):
     def from_string(cls, d: str, date_format: str = None) -> 'Date':
         if date_format is not None:
             now = dt.datetime.now()
-            d = "{} {}".format(d, now.strftime("%H:%M:%S"))
+            d = "{} {}.{}".format(d, now.strftime("%H:%M:%S"), now.microsecond)
             return super().from_string(d, date_format)
 
         params = d.split("-")
@@ -113,7 +115,7 @@ class Date(DateTime):
 
 class Time(DateTime):
     def __str__(self) -> str:
-        return str(self.time())
+        return str(self.time().replace(microsecond=0))
 
     def __eq__(self, other: 'Time') -> bool:
         return self.time() == other.time()
@@ -137,7 +139,7 @@ class Time(DateTime):
     def from_string(cls, t: str, time_format: str = None) -> 'Time':
         if time_format is not None:
             now = dt.datetime.now()
-            t = "{} {}".format(now.strftime("%y-%m-%d"), t)
+            t = "{} {}.{}".format(now.strftime("%y-%m-%d"), t, now.microsecond)
             return super().from_string(t)
 
         params = t.split(":")

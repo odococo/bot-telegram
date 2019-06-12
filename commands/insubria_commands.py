@@ -6,7 +6,7 @@ import logging
 
 from commands.commands import Command
 from telegram.wrappers import InlineKeyboard, InlineButton, Message
-from utils import WebScraper, Date, Time, chunks
+from utils import WebScraper, Date, Time, chunks, DateTime
 
 edifici: Dict = {}
 
@@ -43,7 +43,7 @@ def _get_aula(aula: bs4.element.Tag) -> Dict[str, List[_Lezione]]:
         dettagli = params[3].text
         corso = params[4].text if len(params) > 4 else ""
 
-        lezione = _Lezione(Time.from_string(ora[0], "%H"), Time.from_string(ora[1]), facolta, dettagli, corso)
+        lezione = _Lezione(Time.from_string(ora[0]), Time.from_string(ora[1]), facolta, dettagli, corso)
         aula['lezioni'].append(lezione)
 
     return aula
@@ -99,7 +99,7 @@ class Insubria(Command):
             for ore in chunks(list(range(0, 20 - now.hour)), 3):
                 for ora in ore:
                     ora = ora + now.hour
-                    keyboard.add(i, InlineButton("{}".format(Time(hour=ora)),
+                    keyboard.add(i, InlineButton("{}".format(str(Time(hour=ora))),
                                                  "/{} {} {}".format(self.command(), edificio, ora)))
                 i += 1
             keyboard.add(i, InlineButton("Adesso", "/{} {} {}".format(self.command(), edificio, now)))
