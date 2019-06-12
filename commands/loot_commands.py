@@ -5,7 +5,7 @@ from telegram.wrappers import Message
 
 
 @dataclass
-class LootCommands(Command):
+class Loot(Command):
     def pietre(self) -> Message:
         valori_pietre = {
             'Pietra Anima di Legno': 1,

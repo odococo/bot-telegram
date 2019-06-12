@@ -78,7 +78,7 @@ traduzioni = {
 
 
 @dataclass
-class LampoCommands(Command):
+class Lampo(Command):
     def scrivi(self) -> Message:
         return self.bot.forward_message(sara, self.update.message.chat, self.update.message)
 

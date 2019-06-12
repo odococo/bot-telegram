@@ -4,7 +4,7 @@ import unicodedata as ucd
 from dataclasses import dataclass
 
 from commands.commands import Command
-from telegram.wrappers import InlineKeyboard, InlineButton, Message
+from telegram.wrappers import InlineKeyboard, InlineButton, Message, PrivateChat
 
 
 @dataclass
@@ -80,3 +80,30 @@ class Standard(Command):
         else:  # codifica unicode \u...
             return self.answer(
                 "Il carattere corrispondente a {} è {}".format(codice, codice.encode('utf-8').decode('unicode_escape')))
+
+    def whoami(self) -> Message:
+        # TODO aggiungere parametro per cercare nel database l'utente
+        user = self.from_user()
+
+        return self.answer(
+            "ID: <code>{}</code>\n"
+            "First name: <code>{}</code>\n"
+            "Last name: <code>{}</code>\n"
+            "Username: <code>{}</code>\n"
+            "<a href='tg://user?id={}'>Contattalo!</a>".format(user.user_id, user.first_name, user.last_name,
+                                                               user.username, user.user_id))
+
+    def whereami(self) -> Message:
+        chat = self.update.message.chat
+        if isinstance(chat, PrivateChat):
+            return self.answer(
+                "ID: <code>{}</code>\n"
+                "First name: <code>{}</code>\n"
+                "Last name: <code>{}</code>\n"
+                "Username: <code>{}</code>".format(chat.chat_id, chat.first_name, chat.last_name, chat.username))
+        else:
+            return self.answer(
+                "ID: <code>{}</code>\n"
+                "Title: <code>{}</code>\n"
+                "Supergruppo: <code>{}</code>\n"
+                "Username: <code>{}</code>".format(chat.chat_id, chat.title, chat.supergroup, chat.username))

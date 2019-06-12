@@ -1,51 +1,40 @@
 from commands.commands import Command
-from commands.insubria_commands import InsubriaCommands
-from commands.lampo_commands import LampoCommands
-from commands.loot_commands import LootCommands
-from commands.sara_commands import SaraCommands
+from commands.cron_commands import Cron
+from commands.insubria_commands import Insubria
+from commands.lampo_commands import Lampo
+from commands.loot_commands import Loot
+from commands.sara_commands import Sara
 from commands.standard_commands import Standard
 from telegram.bot import Bot
-from telegram.ids import lampo, sara
+from telegram.ids import sara
 from telegram.wrappers import Update
 
 
 def execute(bot: Bot, update: Update):
+    commands = [
+        Command(bot, update),
+        Standard(bot, update),
+        Insubria(bot, update),
+        Loot(bot, update),
+        Cron(bot, update),
+        Lampo(bot, update),
+        Sara(bot, update)
+    ]
     command = update.message.command
-    default = Command(bot, update)
-    standard = Standard(bot, update)
-    insubria = InsubriaCommands(bot, update)
-    loot = LootCommands(bot, update)
-    lc = LampoCommands(bot, update)
-    sc = SaraCommands(bot, update)
+    default = commands[0]
     c = command
 
     try:
-        if hasattr(standard, command):
-            c = getattr(standard, command)
-            c()
-        elif hasattr(insubria, command):
-            c = getattr(insubria, command)
-            c()
-        elif hasattr(loot, command):
-            c = getattr(loot, command)
-            c()
-        elif update.message.from_user.user_id == sara:
-            if hasattr(sc, command):
-                c = getattr(sc, command)
-                c()
-            else:
-                c = getattr(sc, "tesoro")
-                c(command)
-        elif update.message.from_user.user_id == lampo:
-            if hasattr(lc, command):
-                c = getattr(lc, command)
-                c()
-            else:
-                c = getattr(default, "error")
-                c(command)
+        for command_type in commands:
+            if hasattr(command_type, command):
+                c = getattr(command_type, command)
+                break
+            elif command_type == Sara and update.message.from_user.user_id == sara:
+                c = getattr(command_type, "tesoro")
+                break
         else:
             c = getattr(default, "error")
-            c(command)
+        c()
     except Exception as e:
         import logging
         logging.exception(e)

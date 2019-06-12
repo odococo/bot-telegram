@@ -1,6 +1,7 @@
-import datetime
+import datetime as dt
 import time
 from dataclasses import dataclass
+from typing import Union
 
 from bs4 import BeautifulSoup
 from pyvirtualdisplay import Display
@@ -10,25 +11,35 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webdriver import WebDriver
 
 
-@dataclass
-class Date:
-    """Classe di supporto per l'utilizzo di datetime"""
-    date: datetime.datetime
+class DateTime(dt.datetime):
+
+    def __new__(cls, year: int, month: int, day: int, hour: int, minute: int, second: int,
+                microsecond: int = 0, tzinfo=None, *, fold=0) -> 'DateTime':
+
+        return super().__new__(cls, year, month, day, hour, minute, second, microsecond)
 
     @classmethod
-    def from_millis(cls, millis: int) -> 'Date':
-        return cls(datetime.datetime.fromtimestamp(millis))
+    def from_datetime(cls, datetime: dt.datetime) -> Union['DateTime', 'Date', 'Time']:
+        return cls(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second)
 
     @classmethod
-    def now(cls) -> 'Date':
-        return cls(datetime.datetime.now())
+    def from_string(cls, datetime: str, dt_format: str = "%y-%m-%d %H:%M:%S") -> Union['DateTime', 'Date', 'Time']:
+        return cls.from_datetime(dt.datetime.strptime(datetime, dt_format))
 
-    def __str__(self) -> str:
-        return str(self.date)
+    @classmethod
+    def from_millis(cls, millis: int) -> 'DateTime':
+        return cls.from_datetime(dt.datetime.fromtimestamp(millis))
+
+    @classmethod
+    def by_now(cls):
+        return super().__new__()
+
+    def datetime(self) -> str:
+        return super().__str__()
 
     def add(self, years: int = 0, months: int = 0, days: int = 0,
             hours: int = 0, minutes: int = 0, seconds: int = 0,
-            milliseconds: int = 0, microseconds: int = 0) -> 'Date':
+            milliseconds: int = 0) -> ['DateTime', 'Date', 'Time']:
         """
         year = 365 giorni
         month = 30 giorni
@@ -38,25 +49,17 @@ class Date:
         """
         d = 365 * years + 30 * months + days
         s = 3600 * hours + 60 * minutes + seconds
-        m = 1000 * milliseconds + microseconds
-        return Date(self.date + datetime.timedelta(days=d, seconds=s, microseconds=m))
+        m = 1000 * milliseconds
+        return self.from_datetime(self + dt.timedelta(days=d, seconds=s, microseconds=m))
 
-    def strict_add(self, years: int = 0, months: int = 0, days: int = 0,
-                   hours: int = 0, minutes: int = 0, seconds: int = 0,
-                   microseconds: int = 0):
-        """Aggiunge semplicemente l'unita' di misura
-        Solleva una ValueError se si oltrepassa il range dei campi"""
-        return Date(datetime.datetime(self.date.year + years, self.date.month + months,
-                                      self.date.day + days, self.date.hour + hours,
-                                      self.date.minute + minutes, self.date.second + seconds,
-                                      self.date.microsecond + microseconds))
-
-    def diff(self, other: 'Date', unit: str) -> float:
+    def diff(self, other: 'DateTime', unit: str) -> float:
         """
+        Differenza tra due date in un'unità di misura a scelta
+
         years = 365 giorni
         months = 30 giorni
         """
-        delta = self.date - other.date
+        delta = self - other
         switcher = {
             'years': delta.days / 30 / 365,
             'months': delta.days / 30,
@@ -69,72 +72,81 @@ class Date:
         }
         return switcher.get(unit, "Unita' non valida")
 
-    def to_string(self, format_date: str) -> str:
-        return self.date.strftime(format_date)
 
-    def to_date(self) -> str:
-        return self.to_string("%Y-%m-%d")
+class Date(DateTime):
+    def __str__(self):
+        return str(self.date())
 
-    def to_time(self) -> str:
-        return self.to_string("%H:%M:%S")
+    def __eq__(self, other: 'Date') -> bool:
+        return self.date() == other.date()
 
+    def __gt__(self, other: 'Date') -> bool:
+        return self.date() > other.date()
 
-@dataclass
-class Time:
-    ore: int
-    minuti: int = 0
-    secondi: int = 0
+    def __ge__(self, other: 'Date') -> bool:
+        return self.date() >= other.date()
 
-    def __eq__(self, other) -> bool:
-        return self.ore == other.ore and self.minuti == other.minuti and self.secondi == other.secondi
+    def __ne__(self, other: 'Date') -> bool:
+        return self.date() != other.date()
 
-    def __gt__(self, other) -> bool:
-        if self == other:
-            return False
-        elif self.ore < other.ore:
-            return False
-        elif self.ore == other.ore and self.minuti < other.minuti:
-            return False
-        elif self.ore == other.ore and self.minuti == other.minuti and self.secondi < other.secondi:
-            return False
+    def __lt__(self, other: 'Date') -> bool:
+        return self.date() < other.date()
+
+    def __le__(self, other: 'Date') -> bool:
+        return self.date() <= other.date()
+
+    @classmethod
+    def from_string(cls, d: str, date_format: str = None) -> 'Date':
+        if date_format is not None:
+            now = dt.datetime.now()
+            d = "{} {}".format(d, now.strftime("%H:%M:%S"))
+            return super().from_string(d, date_format)
+
+        params = d.split("-")
+        if len(params) == 1:
+            return Date.from_string(d + "-01-01", "%y")
+        elif len(params) == 2:
+            return Date.from_string(d + "-01", "%y-%m")
         else:
-            return True
+            return Date.from_string(d, "%y-%m-%d")
 
-    def __ge__(self, other) -> bool:
-        return self == other or self > other
 
-    def __le__(self, other):
-        return not self > other
-
-    def __lt__(self, other):
-        return not self >= other
-
-    def __ne__(self, other):
-        return not self == other
-
+class Time(DateTime):
     def __str__(self) -> str:
-        return "{:02d}:{:02d}".format(self.ore, self.minuti)
+        return str(self.time())
+
+    def __eq__(self, other: 'Time') -> bool:
+        return self.time() == other.time()
+
+    def __gt__(self, other: 'Time') -> bool:
+        return self.time() > other.time()
+
+    def __ge__(self, other: 'Time') -> bool:
+        return self.time() >= other.time()
+
+    def __ne__(self, other: 'Time') -> bool:
+        return self.time() != other.time()
+
+    def __lt__(self, other: 'Time') -> bool:
+        return self.time() < other.time()
+
+    def __le__(self, other: 'Time') -> bool:
+        return self.time() <= other.time()
 
     @classmethod
-    def from_string(cls, string: str):
-        params = string.split(":")
-        ore = int(params[0])
-        if len(params) > 1:
-            minuti = int(params[1])
+    def from_string(cls, t: str, time_format: str = None) -> 'Time':
+        if time_format is not None:
+            now = dt.datetime.now()
+            t = "{} {}".format(now.strftime("%y-%m-%d"), t)
+            return super().from_string(t)
+
+        params = t.split(":")
+        if len(params) == 1:
+            return Time.from_string(t + ":00:00", "%H")
+        elif len(params) == 2:
+            return Time.from_string(t + ":00", "%H:%M")
         else:
-            minuti = 0
-        if len(params) > 2:
-            secondi = int(params[2])
-        else:
-            secondi = 0
-
-        return cls(ore, minuti, secondi)
-
-    @classmethod
-    def now(cls):
-        adesso = datetime.datetime.now()
-
-        return cls(adesso.hour, adesso.minute, adesso.second)
+            return Time.from_string(t, "%H:%M:%S")
 
 
 @dataclass

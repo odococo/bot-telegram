@@ -3,7 +3,7 @@ from typing import List, Dict, Callable
 
 from telegram.bot import Bot
 from telegram.ids import lampo
-from telegram.wrappers import Update, Keyboard, Message
+from telegram.wrappers import Update, Keyboard, Message, User
 
 
 @dataclass
@@ -16,6 +16,9 @@ class Command:
 
     def params(self) -> List[str]:
         return self.update.message.params
+
+    def from_user(self) -> User:
+        return self.update.message.from_user
 
     def answer(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:
         """
@@ -40,8 +43,8 @@ class Command:
                                      message_id=self.update.message.message_id,
                                      text=text, keyboard=keyboard)
 
-    def error(self, command: str) -> Message:
-        return self.answer("Il comando {} non esiste!".format(command))
+    def error(self) -> Message:
+        return self.answer("Il comando {} non esiste!".format(self.command()))
 
     def wrong(self, command: Callable[[], Dict]) -> Message:
         if not command.__doc__:

@@ -6,7 +6,7 @@ from telegram.wrappers import Message
 
 
 @dataclass
-class SaraCommands(Command):
+class Sara(Command):
     def scrivi(self) -> Message:
         return self.bot.forward_message(lampo, self.update.message.chat, self.update.message)
 

@@ -1,7 +1,8 @@
 import json
 from typing import Dict, List
-
+import logging
 import requests
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from telegram.ids import lampo
 from telegram.wrappers import Update, Chat, Message, Keyboard
@@ -11,9 +12,11 @@ max_length = 2048
 
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
+    scheduler = BackgroundScheduler()
 
     def __init__(self, token: str):
         self.token = token
+        self.scheduler.start()
 
     def __execute(self, method: str, **params) -> Dict:
         """
@@ -31,6 +34,16 @@ class Bot:
             print(request.json().get('error', request.json().get('description', request.json())))
 
             return {}
+
+    def add_cron_job(self, function: callable, single: bool, time_details: Dict[str, int]) -> str:
+        job_id = self.scheduler.add_job(function, 'date' if single else 'interval', **time_details).id
+        logging.info("Aggiunto job con id {}".format(job_id))
+
+        return job_id
+
+    def remove_cron_job(self, job_id: str):
+        logging.info("Rimosso job con id {}".format(job_id))
+        self.scheduler.remove_job(job_id)
 
     def dump(self, to: int = lampo, *args, **kwargs) -> Message:
         return self.send_message(to, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
@@ -65,7 +78,6 @@ class Bot:
         """
         while len(text) > max_length:
             index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
-            index = index if index > 0 else len(text)
             result = Message.from_dict(
                 self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
                                parse_mode=parse_mode, reply_to_message_id=reply_to))

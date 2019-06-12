@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List
 
 import bs4
+import logging
 
 from commands.commands import Command
 from telegram.wrappers import InlineKeyboard, InlineButton, Message
@@ -41,21 +42,22 @@ def _get_aula(aula: bs4.element.Tag) -> Dict[str, List[_Lezione]]:
         facolta = params[2].text
         dettagli = params[3].text
         corso = params[4].text if len(params) > 4 else ""
-        lezione = _Lezione(Time.from_string(ora[0]), Time.from_string(ora[1]), facolta, dettagli, corso)
+
+        lezione = _Lezione(Time.from_string(ora[0], "%H"), Time.from_string(ora[1]), facolta, dettagli, corso)
         aula['lezioni'].append(lezione)
 
     return aula
 
 
 @dataclass
-class InsubriaCommands(Command):
+class Insubria(Command):
     driver = None
 
     def _get_timeline(self, edificio) -> bool:
         global tries
 
-        if edificio not in edifici or edifici[edificio]['data'].date.day != Date.now().date.day:
-            print("web scraping per {} con {} secondo/i di attesa".format(edificio, tries))
+        if edificio not in edifici or edifici[edificio]['data'].date.day != Date.now().day:
+            logging.info("web scraping per {} con {} secondo/i di attesa".format(edificio, tries))
             url = "http://timeline.uninsubria.it/browse.php?sede={}"
             self.replace("Consulto la timeline...")
 
@@ -95,9 +97,9 @@ class InsubriaCommands(Command):
             now = Time.now()
             keyboard = InlineKeyboard()
             i = 0
-            for ore in chunks(list(range(0, 20 - now.ore)), 3):
+            for ore in chunks(list(range(0, 20 - now.hour)), 3):
                 for ora in ore:
-                    ora = ora + now.ore
+                    ora = ora + now.hour
                     keyboard.add(i, InlineButton("{}".format(Time(ora)),
                                                  "/{} {} {}".format(self.command(), edificio, ora)))
                 i += 1
@@ -106,21 +108,21 @@ class InsubriaCommands(Command):
             return self.replace("Per che ora vuoi controllare se ci sono aule libere?", keyboard)
         else:
             edificio = self.params()[0]
-            time = Time.from_string(self.params()[1])
+            when = Time.from_string(self.params()[1])
             if not self._get_timeline(edificio):
                 return self.replace("Errore caricamento timeline. Riprova!")
 
-            text = "Aule libere per le {}\n".format(time)
+            text = "Aule libere per le {}\n".format(when)
             for aula in edifici[edificio]['aule']:
                 free = True
                 stato = ""
                 if not len(aula['lezioni']):
                     stato = "libera"
                 for lezione in aula['lezioni']:
-                    if time >= lezione.start:
+                    if when >= lezione.start:
                         if not lezione.corso:
                             stato = "aula studio"
-                        elif time >= lezione.end:
+                        elif when >= lezione.end:
                             stato = "libera"
                         else:
                             stato = "occupata almeno fino alle {}".format(lezione.end)

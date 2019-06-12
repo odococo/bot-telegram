@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Union
 
 from telegram.ids import sara, lootplus
-from utils import Date
+from utils import Date, DateTime
 
 
 @dataclass
@@ -62,6 +62,12 @@ class User:
     last_name: str
     username: str
 
+    def __hash__(self) -> int:
+        return hash(self.user_id)
+
+    def __eq__(self, other) -> bool:
+        return self.user_id == other.user_id
+
     @classmethod
     def from_dict(cls, user: Dict) -> 'User':
         user_id = user['id']
@@ -76,10 +82,10 @@ class User:
 class Message:
     message_id: int
     chat: Union[Chat, PrivateChat, GroupChat]
-    when: Date
+    when: DateTime
     from_user: User
     reply_to: 'Message'
-    original_when: Date
+    original_when: DateTime
     original_from_user: User
 
     @classmethod
@@ -101,14 +107,14 @@ class Message:
         else:
             message_id = message['message_id']
             chat = Chat.from_dict(message['chat'])
-            when = Date.from_millis(message['date'])
+            when = DateTime.from_millis(message['date'])
             from_user = User.from_dict(message['from'])
             if 'reply_to_message' in message:
                 reply_to = Message.from_dict(message['reply_to_message'])
             else:
                 reply_to = None
             if 'forward_date' in message:
-                original_when = Date.from_millis(message['forward_date'])
+                original_when = DateTime.from_millis(message['forward_date'])
                 original_from_user = User.from_dict(message['forward_from'])
             else:
                 original_when = None
@@ -125,7 +131,7 @@ class TextMessage(Message):
     def from_dict(cls, message: Dict) -> 'TextMessage':
         message_id = message['message_id']
         chat = Chat.from_dict(message['chat'])
-        when = Date.from_millis(message['date'])
+        when = DateTime.from_millis(message['date'])
         from_user = User.from_dict(message['from'])
         text = message['text']
         if 'reply_to_message' in message:
@@ -133,7 +139,7 @@ class TextMessage(Message):
         else:
             reply_to = None
         if 'forward_date' in message:
-            original_when = Date.from_millis(message['forward_date'])
+            original_when = DateTime.from_millis(message['forward_date'])
             original_from_user = User.from_dict(message['forward_from'])
         else:
             original_when = None
@@ -151,14 +157,14 @@ class Command(TextMessage):
     def from_dict(cls, message: Dict) -> 'Command':
         message_id = message['message_id']
         chat = Chat.from_dict(message['chat'])
-        when = Date.from_millis(message['date'])
+        when = DateTime.from_millis(message['date'])
         from_user = User.from_dict(message['from'])
         if 'reply_to_message' in message:
             reply_to = Message.from_dict(message['reply_to_message'])
         else:
             reply_to = None
         if 'forward_date' in message:
-            original_when = Date.from_millis(message['forward_date'])
+            original_when = DateTime.from_millis(message['forward_date'])
             original_from_user = User.from_dict(message['forward_from'])
         else:
             original_when = None
