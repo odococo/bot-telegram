@@ -13,7 +13,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 
 class DateTime(dt.datetime):
 
-    def __new__(cls, year: int, month: int, day: int, hour: int, minute: int, second: int,
+    def __new__(cls, year: int = 1900, month: int = 1, day: int = 1, hour: int = 0, minute: int = 0, second: int = 0,
                 microsecond: int = 0, tzinfo=None, *, fold=0) -> 'DateTime':
 
         return super().__new__(cls, year, month, day, hour, minute, second, microsecond)

@@ -49,40 +49,39 @@ def _get_aula(aula: bs4.element.Tag) -> Dict[str, List[_Lezione]]:
     return aula
 
 
+def get_timeline(edificio) -> bool:
+    global tries
+
+    if edificio not in edifici or edifici[edificio]['data'].day != Date.by_now().day:
+        logging.info("web scraping per {} con {} secondo/i di attesa".format(edificio, tries))
+        url = "http://timeline.uninsubria.it/browse.php?sede={}"
+
+        scraper = WebScraper.firefox()
+        timeline = scraper.get_page(url.format(edificio), tries)
+
+        aule = []
+        aule_edificio = timeline.find_all('tr')
+        for i in range(1, len(aule_edificio)):
+            aule.append(_get_aula(aule_edificio[i]))
+
+        if len(aule) > 0:
+            edifici[edificio] = {
+                'data': Date.by_now(),
+                'aule': aule  # lista di aule
+            }
+            tries = 1
+        else:
+            tries += 1
+
+            return False
+        scraper.quit()
+
+    return True
+
+
 @dataclass
 class Insubria(Command):
     driver = None
-
-    def _get_timeline(self, edificio) -> bool:
-        global tries
-
-        if edificio not in edifici or edifici[edificio]['data'].date.day != Date.now().day:
-            logging.info("web scraping per {} con {} secondo/i di attesa".format(edificio, tries))
-            url = "http://timeline.uninsubria.it/browse.php?sede={}"
-            self.replace("Consulto la timeline...")
-
-            scraper = WebScraper.firefox()
-            timeline = scraper.get_page(url.format(edificio), tries)
-            self.replace("Elaboro i dati...")
-
-            aule = []
-            aule_edificio = timeline.find_all('tr')
-            for i in range(1, len(aule_edificio)):
-                aule.append(_get_aula(aule_edificio[i]))
-
-            if len(aule) > 0:
-                edifici[edificio] = {
-                    'data': Date.now(),
-                    'aule': aule  # lista di aule
-                }
-                tries = 1
-            else:
-                tries += 1
-
-                return False
-            scraper.quit()
-
-        return True
 
     def aule(self) -> Message:
         if not len(self.params()):
@@ -100,7 +99,7 @@ class Insubria(Command):
             for ore in chunks(list(range(0, 20 - now.hour)), 3):
                 for ora in ore:
                     ora = ora + now.hour
-                    keyboard.add(i, InlineButton("{}".format(Time(ora)),
+                    keyboard.add(i, InlineButton("{}".format(Time(hour=ora)),
                                                  "/{} {} {}".format(self.command(), edificio, ora)))
                 i += 1
             keyboard.add(i, InlineButton("Adesso", "/{} {} {}".format(self.command(), edificio, now)))
@@ -109,7 +108,8 @@ class Insubria(Command):
         else:
             edificio = self.params()[0]
             when = Time.from_string(self.params()[1])
-            if not self._get_timeline(edificio):
+            self.replace("Consulto la timeline...")
+            if not get_timeline(edificio):
                 return self.replace("Errore caricamento timeline. Riprova!")
 
             text = "Aule libere per le {}\n".format(when)
@@ -150,7 +150,8 @@ class Insubria(Command):
             return self.answer("Scegli l'edificio:", keyboard)
         else:
             edificio = self.params()[0]
-            if not self._get_timeline(edificio):
+            self.replace("Consulto la timeline...")
+            if not get_timeline(edificio):
                 return self.replace("Errore caricamento timeline. Riprova!")
             if len(self.params()) == 1:
                 keyboard = InlineKeyboard()

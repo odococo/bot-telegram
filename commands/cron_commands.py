@@ -29,7 +29,7 @@ class Cron(Command):
         to_chat = int(self.params()[0])
         once = True
         if self.params()[1] == "now":
-            from_when = Time.adesso()
+            from_when = Time.by_now()
         else:
             from_when = Time.from_string(self.params()[1])
         if self.params()[2].isnumeric():

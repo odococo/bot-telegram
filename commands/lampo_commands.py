@@ -1,6 +1,8 @@
 import unicodedata
 from dataclasses import dataclass
 
+import requests
+
 from commands.commands import Command
 from telegram.ids import sara, lampo
 from telegram.wrappers import Message
@@ -99,3 +101,6 @@ class Lampo(Command):
             return self.answer("Le traduzioni che contengono {} sono: \n{}".format(parola, "\n".join(parole)))
         else:
             return self.answer("Non ci sono traduzioni per {}".format(parola))
+
+    def whatismyip(self) -> Message:
+        return self.bot.dump(ip=requests.get("http://ipinfo.io?").json())

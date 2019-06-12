@@ -1,5 +1,6 @@
+import datetime
 import json
-from typing import Dict, List
+from typing import Dict, List, Union
 import logging
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -35,7 +36,7 @@ class Bot:
 
             return {}
 
-    def add_cron_job(self, function: callable, single: bool, time_details: Dict[str, int]) -> str:
+    def add_cron_job(self, function: callable, single: bool, time_details: Dict[str, Union[int, datetime.datetime]]) -> str:
         job_id = self.scheduler.add_job(function, 'date' if single else 'interval', **time_details).id
         logging.info("Aggiunto job con id {}".format(job_id))
 
