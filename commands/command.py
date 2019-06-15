@@ -37,5 +37,5 @@ def execute(bot: Bot, update: Update):
         c()
     except Exception as e:
         import logging
-        logging.exception(e)
+        logging.debug(e)
         getattr(default, "wrong")(c)

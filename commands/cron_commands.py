@@ -18,12 +18,13 @@ class Cron(Command):
         Sintassi:
         /avvisa id_chat/utente da_quando ogni_quanto unità_di_misura messaggio
 
+        /avvisa id_chat/utente da_quando messaggio
+
         id_chat/utente è l'id (numero) o l'username della chat
         da_quando è now oppure un'ora (formato hh::MM)
         ogni_quanto è un valore intero
         unità_di_misura un valore tra weeks/days/hours/minutes/seconds
         messaggio è il testo da mandare
-        :return:
         """
         from_user = self.from_user()
         to_chat = int(self.params()[0])

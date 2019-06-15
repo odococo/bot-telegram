@@ -10,6 +10,8 @@ from telegram.wrappers import Update, Chat, Message, Keyboard
 
 max_length = 2048
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
@@ -39,6 +41,7 @@ class Bot:
     def add_cron_job(self, function: callable, single: bool, time_details: Dict[str, Union[int, datetime.datetime]]) -> str:
         job_id = self.scheduler.add_job(function, 'date' if single else 'interval', **time_details).id
         logging.info("Aggiunto job con id {}".format(job_id))
+        logging.debug("{}".format(self.scheduler.get_job(job_id)))
 
         return job_id
 
