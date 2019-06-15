@@ -6,6 +6,7 @@ import requests
 from commands.commands import Command
 from telegram.ids import sara, lampo
 from telegram.wrappers import Message
+from utils import DateTime
 
 traduzioni = {
     'çfarë dreqin po thua': "che diavolo stai dicendo",
@@ -104,3 +105,6 @@ class Lampo(Command):
 
     def whatismyip(self) -> Message:
         return self.bot.dump(ip=requests.get("http://ipinfo.io?").json())
+
+    def server_time(self):
+        return self.answer(DateTime.by_now())

@@ -39,6 +39,9 @@ class DateTime(dt.datetime):
     def datetime(self) -> str:
         return super().__str__()
 
+    def to_str(self, datetime_format: str):
+        return self.strftime(datetime_format)
+
     def add(self, years: int = 0, months: int = 0, days: int = 0,
             hours: int = 0, minutes: int = 0, seconds: int = 0,
             milliseconds: int = 0) -> ['DateTime', 'Date', 'Time']:
@@ -115,7 +118,7 @@ class Date(DateTime):
 
 class Time(DateTime):
     def __str__(self) -> str:
-        return str(self.time().replace(microsecond=0))
+        return self.to_str("%H:%M")
 
     def __eq__(self, other: 'Time') -> bool:
         return self.time() == other.time()
