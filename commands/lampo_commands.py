@@ -107,4 +107,4 @@ class Lampo(Command):
         return self.bot.dump(ip=requests.get("http://ipinfo.io?").json())
 
     def server_time(self):
-        return self.answer(DateTime.by_now())
+        return self.answer(str(DateTime.by_now()))
