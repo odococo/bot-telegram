@@ -51,28 +51,28 @@ class Cron(Command):
 
         return self.answer("Il cronjob è stato correttamente settato con id: <code>{}</code>".format(job_id))
 
-    def getavvisi(self) -> Message:
+    def avvisi(self) -> Message:
         if self.from_user() in jobs and jobs[self.from_user()]:
             text = "Lista avvisi:\n"
-            avvisi = "\n". join(["Avviso: <code>{}</code>".format(job) for job in jobs[self.from_user()]])
+            avvisi = "\n".join(["Avviso: <code>{}</code>".format(job) for job in jobs[self.from_user()]])
 
             return self.answer(text + avvisi)
         else:
             return self.answer("Non hai reminder attivi")
 
-    def stopavviso(self) -> Message:
-        job_id = self.params()[0]
-        jobs.get(self.from_user(), set()).discard(job_id)
-        self.bot.remove_cron_job(job_id)
+    def stop(self) -> Message:
+        if self.params()[0] == "all":
+            if self.from_user() in jobs:
+                for job_id in jobs[self.from_user()]:
+                    self.bot.remove_cron_job(job_id)
+                del jobs[self.from_user()]
 
-        return self.answer("Rimosso reminder")
-
-    def stopavvisi(self) -> Message:
-        if self.from_user() in jobs:
-            for job_id in jobs[self.from_user()]:
-                self.bot.remove_cron_job(job_id)
-            del jobs[self.from_user()]
-
-            return self.answer("Cancellati tutti i reminder")
+                return self.answer("Cancellati tutti i reminder")
+            else:
+                return self.answer("Non hai reminder attivi")
         else:
-            return self.answer("Non hai reminder attivi")
+            job_id = self.params()[0]
+            jobs.get(self.from_user(), set()).discard(job_id)
+            self.bot.remove_cron_job(job_id)
+
+            return self.answer("Rimosso reminder")
