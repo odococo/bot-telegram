@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 import logging
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
+from pytz import utc
 
 from telegram.ids import lampo
 from telegram.wrappers import Update, Chat, Message, Keyboard
@@ -15,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
-    scheduler = BackgroundScheduler()
+    scheduler = BackgroundScheduler(timezone=utc)
 
     def __init__(self, token: str):
         self.token = token
@@ -41,7 +42,7 @@ class Bot:
     def add_cron_job(self, function: callable, single: bool, time_details: Dict[str, Union[int, datetime.datetime]]) -> str:
         job_id = self.scheduler.add_job(function, 'date' if single else 'interval', **time_details).id
         logging.info("Aggiunto job con id {}".format(job_id))
-        logging.debug("{}".format(self.scheduler.get_job(job_id)))
+        logging.info("{}".format(self.scheduler.get_job(job_id)))
 
         return job_id
 

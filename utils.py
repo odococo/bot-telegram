@@ -15,7 +15,6 @@ class DateTime(dt.datetime):
 
     def __new__(cls, year: int = 1900, month: int = 1, day: int = 1, hour: int = 0, minute: int = 0, second: int = 0,
                 microsecond: int = 0, tzinfo=None, *, fold=0) -> 'DateTime':
-
         return super().__new__(cls, year, month, day, hour, minute, second, microsecond)
 
     @classmethod
@@ -35,6 +34,37 @@ class DateTime(dt.datetime):
         now = dt.datetime.now()
 
         return cls.from_datetime(now)
+
+    @classmethod
+    def by_now_with(cls, year: int = None, month: int = None, day: int = None, hour: int = None, minute: int = None,
+                    second: int = None, microsecond: int = None):
+        now = DateTime.by_now()
+        year = now.year if year is None else year
+        month = now.month if month is None else month
+        day = now.day if day is None else day
+        hour = now.hour if hour is None else hour
+        minute = now.minute if minute is None else minute
+        second = now.second if second is None else second
+        microsecond = now.microsecond if microsecond is None else microsecond
+
+        date = DateTime(year, month, day, hour, minute, second, microsecond)
+
+        while date < now:
+            if date.year < now.year:
+                date = date.add(years=1)
+            elif date.month < now.month:
+                date = date.add(months=1)
+            elif date.day < now.day:
+                date = date.add(days=1)
+            elif date.hour < now.hour:
+                date = date.add(hours=1)
+            else:
+                date = date.add(minutes=1)
+
+        return date.to(cls)
+
+    def to(self, cls: type):
+        return cls(self.year, self.month, self.day, self.hour, self.minute, self.second, self.microsecond)
 
     def datetime(self) -> str:
         return super().__str__()

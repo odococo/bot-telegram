@@ -1,7 +1,8 @@
+import logging
+import random
 import time
 from typing import List
 
-import logging
 import requests
 
 from commands.command import execute
@@ -11,8 +12,10 @@ from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time
 
+bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
 
-def polling(bot: Bot, last_update: int = 0, wait: int = 1):
+
+def polling(last_update: int = 0, wait: int = 1):
     while True:
         updates = bot.get_updates(last_update)
         for update in updates:
@@ -27,18 +30,18 @@ def polling(bot: Bot, last_update: int = 0, wait: int = 1):
         time.sleep(wait)
 
 
-def discard(bot: Bot):
+def discard():
     updates = bot.get_updates()
-    polling(bot, updates[-1].update_id + 1 if len(updates) > 0 else 0)
+    polling(updates[-1].update_id + 1 if len(updates) > 0 else 0)
 
 
-def cron_jobs(bot: Bot):
+def cron_jobs():
+    print(Time.by_now_with(hour=0, minute=5))
     bot.add_cron_job(lambda: _get_timelines(['mtg', 'mrs', 'sep']), single=False,
-                     time_details={'start_date': Time(hour=0, minute=5), 'days': 1})
+                     time_details={'start_date': Time.by_now_with(hour=0, minute=5), 'days': 1})
     bot.add_cron_job(lambda: bot.dump(ip=requests.get("http://ipinfo.io?").json()), single=False,
                      time_details={'hours': 4})
-    bot.add_cron_job(lambda: bot.send_message(sara, "Sono le 21.30"), single=False,
-                     time_details={'start_date': Time(hour=21, minute=30), 'days': 1})
+    _send_reminders()
 
 
 def _get_timelines(edifici: List[str]):
@@ -47,11 +50,21 @@ def _get_timelines(edifici: List[str]):
             logging.info("Ritento a consulare la timeline di {}".format(edificio))
 
 
+def _send_reminders():
+    hour = random.randint(19, 23)
+    minute = random.randint(0, 59)
+    bot.add_cron_job(_send_reminder, single=True, time_details={'run_date': Time.by_now_with(hour=hour, minute=minute)})
+
+
+def _send_reminder():
+    bot.send_message(sara, "Forgot something?")
+    _send_reminders()
+
+
 def main():
     try:
-        bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
-        cron_jobs(bot)
-        polling(bot)
+        cron_jobs()
+        polling()
     except requests.exceptions.ConnectionError:
         time.sleep(1)
         main()
