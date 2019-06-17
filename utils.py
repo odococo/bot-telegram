@@ -50,16 +50,13 @@ class DateTime(dt.datetime):
         date = DateTime(year, month, day, hour, minute, second, microsecond)
 
         while date < now:
+            print(date, now)
             if date.year < now.year:
                 date = date.add(years=1)
             elif date.month < now.month:
                 date = date.add(months=1)
-            elif date.day < now.day:
-                date = date.add(days=1)
-            elif date.hour < now.hour:
-                date = date.add(hours=1)
             else:
-                date = date.add(minutes=1)
+                date = date.add(days=1)
 
         return date.to(cls)
 
