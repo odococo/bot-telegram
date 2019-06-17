@@ -50,7 +50,6 @@ class DateTime(dt.datetime):
         date = DateTime(year, month, day, hour, minute, second, microsecond)
 
         while date < now:
-            print(date, now)
             if date.year < now.year:
                 date = date.add(years=1)
             elif date.month < now.month:
