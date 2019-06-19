@@ -93,7 +93,8 @@ class Lampo(Command):
         parola = " ".join(self.params()[1:])
 
         if lingua == "it":
-            parole = ["<strong>{}</strong> --> <code>{}</code>".format(it, al) for al, it in traduzioni.items() if parola in it]
+            parole = ["<strong>{}</strong> --> <code>{}</code>".format(it, al) for al, it in traduzioni.items() if
+                      parola in it]
         else:
             parole = ["<strong>{}</strong> --> <code>{}</code>".format(al, it) for al, it in traduzioni.items() if
                       parola in al or parola in str(unicodedata.normalize('NFKD', al).encode('ascii', 'ignore'))]
@@ -110,4 +111,5 @@ class Lampo(Command):
         return self.answer(str(DateTime.by_now()))
 
     def getavvisi(self):
-        return self.answer("\n".join(self.bot.scheduler.get_jobs()))
+        return self.answer("\n".join(
+            ["id: <code>{}</code> ==> {}".format(job.id, job.next_run_time) for job in self.bot.scheduler.get_jobs()]))
