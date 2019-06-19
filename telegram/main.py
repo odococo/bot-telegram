@@ -8,7 +8,7 @@ import requests
 from commands.command import execute
 from commands.insubria_commands import get_timeline
 from telegram.bot import Bot
-from telegram.ids import lampo
+from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time
 
@@ -58,7 +58,7 @@ def _send_reminders(bot: Bot):
 
 
 def _send_reminder(bot: Bot, hour: int, minute: int):
-    bot.send_message(lampo, "Forgot something? Sono le {}:{}".format(hour, minute))
+    bot.send_message(sara, "Forgot something? Sono le {}:{}".format(hour, minute))
     _send_reminders(bot)
 
 

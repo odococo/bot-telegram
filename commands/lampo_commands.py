@@ -108,3 +108,6 @@ class Lampo(Command):
 
     def server_time(self):
         return self.answer(str(DateTime.by_now()))
+
+    def getavvisi(self):
+        return self.answer("\n".join(self.bot.scheduler.get_jobs()))
