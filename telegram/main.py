@@ -12,6 +12,8 @@ from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time
 
+logging.basicConfig(level=logging.INFO)
+
 
 def polling(bot: Bot, last_update: int = 0, wait: int = 1):
     while True:

@@ -11,16 +11,15 @@ from telegram.wrappers import Update, Chat, Message, Keyboard
 
 max_length = 2048
 
-logging.basicConfig(level=logging.INFO)
-
-
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
-    scheduler = BackgroundScheduler()
+    scheduler: BackgroundScheduler = None
     #  scheduler = BackgroundScheduler(timezone=utc)
 
     def __init__(self, token: str):
         self.token = token
+        if self.scheduler is None:
+            self.scheduler = BackgroundScheduler()
         self.scheduler.start()
 
     def __execute(self, method: str, **params) -> Dict:
@@ -52,9 +51,12 @@ class Bot:
         logging.info("Rimosso job con id {}".format(job_id))
         self.scheduler.remove_job(job_id)
 
-    def dump(self, to: int = lampo, *args, **kwargs) -> Message:
+    def dump(self, to: int, *args, **kwargs) -> Message:
         return self.send_message(to, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
                                                                                                     sort_keys=True))
+
+    def debug(self, *args) -> Message:
+        return self.dump(lampo, *args)
 
     def get_updates(self, last_update=0) -> List[Update]:
         """

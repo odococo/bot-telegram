@@ -1,5 +1,8 @@
+import logging
+
 from commands.commands import Command
 from commands.cron_commands import Cron
+from commands.f1_commands import F1
 from commands.insubria_commands import Insubria
 from commands.lampo_commands import Lampo
 from commands.loot_commands import Loot
@@ -14,6 +17,7 @@ def execute(bot: Bot, update: Update):
     commands = [
         Command(bot, update),
         Standard(bot, update),
+        F1(bot, update),
         Insubria(bot, update),
         Loot(bot, update),
         Cron(bot, update),
@@ -36,6 +40,5 @@ def execute(bot: Bot, update: Update):
             c = getattr(default, "error")
         c()
     except Exception as e:
-        import logging
-        logging.debug(e)
+        logging.exception(e)
         getattr(default, "wrong")(c)

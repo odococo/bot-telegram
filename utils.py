@@ -1,8 +1,10 @@
 import datetime as dt
+import logging
 import time
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Any, List, Dict
 
+import requests
 from bs4 import BeautifulSoup
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -22,7 +24,7 @@ class DateTime(dt.datetime):
         return cls(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second)
 
     @classmethod
-    def from_string(cls, datetime: str, dt_format: str = "%y-%m-%d %H:%M:%S.%f") -> Union['DateTime', 'Date', 'Time']:
+    def from_string(cls, datetime: str, dt_format: str = "%Y-%m-%d %H:%M:%S.%f") -> Union['DateTime', 'Date', 'Time']:
         return cls.from_datetime(dt.datetime.strptime(datetime, dt_format))
 
     @classmethod
@@ -39,13 +41,13 @@ class DateTime(dt.datetime):
     def by_now_with(cls, year: int = None, month: int = None, day: int = None, hour: int = None, minute: int = None,
                     second: int = None, microsecond: int = None):
         now = DateTime.by_now()
-        year = now.year if year is None else year
-        month = now.month if month is None else month
-        day = now.day if day is None else day
-        hour = now.hour if hour is None else hour
-        minute = now.minute if minute is None else minute
-        second = now.second if second is None else second
-        microsecond = now.microsecond if microsecond is None else microsecond
+        year = year or now.year
+        month = month or now.month
+        day = day or now.day
+        hour = hour or now.hour
+        minute = minute or now.minute
+        second = second or now.second
+        microsecond = microsecond or now.microsecond
 
         date = DateTime(year, month, day, hour, minute, second, microsecond)
 
@@ -135,11 +137,11 @@ class Date(DateTime):
 
         params = d.split("-")
         if len(params) == 1:
-            return Date.from_string(d + "-01-01", "%y")
+            return Date.from_string(d + "-01-01", "%Y")
         elif len(params) == 2:
             return Date.from_string(d + "-01", "%y-%m")
         else:
-            return Date.from_string(d, "%y-%m-%d")
+            return Date.from_string(d, "%Y-%m-%d")
 
 
 class Time(DateTime):
@@ -168,7 +170,7 @@ class Time(DateTime):
     def from_string(cls, t: str, time_format: str = None) -> 'Time':
         if time_format is not None:
             now = dt.datetime.now()
-            t = "{} {}.{}".format(now.strftime("%y-%m-%d"), t, now.microsecond)
+            t = "{} {}.{}".format(now.strftime("%Y-%m-%d"), t, now.microsecond)
             return super().from_string(t)
 
         params = t.split(":")
@@ -220,7 +222,20 @@ class WebScraper:
         self.driver.quit()
 
 
+def get_page(url: str) -> BeautifulSoup:
+    return BeautifulSoup(requests.get(url).content, "html.parser")
+
+
+def get_json(url: str) -> Dict:
+    logging.debug(url)
+    return requests.get(url).json()
+
+
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i:i + n]
+
+
+def join(iterable: List[Any], separator: str, prefix: str = "", postfix: str = ""):
+    return prefix + separator.join([str(element) for element in iterable if str(element)]) + postfix
