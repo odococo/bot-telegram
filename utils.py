@@ -44,13 +44,14 @@ class DateTime(dt.datetime):
         year = year or now.year
         month = month or now.month
         day = day or now.day
-        hour = hour or now.hour
-        minute = minute or now.minute
-        second = second or now.second
-        microsecond = microsecond or now.microsecond
+        # questi valori potrebbero essere 0 ma verrebbero valutati come False
+        hour = hour if hour is not None else now.hour
+        minute = minute if minute is not None else now.minute
+        second = second if second is not None else now.second
+        microsecond = microsecond if microsecond is not None else now.microsecond
 
         date = DateTime(year, month, day, hour, minute, second, microsecond)
-
+        print(date)
         while date < now:
             if date.year < now.year:
                 date = date.add(years=1)
@@ -58,7 +59,7 @@ class DateTime(dt.datetime):
                 date = date.add(months=1)
             else:
                 date = date.add(days=1)
-
+        print(date)
         return date.to(cls)
 
     def to(self, cls: type):

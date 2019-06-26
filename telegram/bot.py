@@ -55,8 +55,8 @@ class Bot:
         return self.send_message(to, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
                                                                                                     sort_keys=True))
 
-    def debug(self, *args) -> Message:
-        return self.dump(lampo, *args)
+    def debug(self, *args, **kwargs) -> Message:
+        return self.dump(lampo, *args, **kwargs)
 
     def get_updates(self, last_update=0) -> List[Update]:
         """
