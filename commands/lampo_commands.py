@@ -82,6 +82,9 @@ traduzioni = {
 
 @dataclass
 class Lampo(Command):
+    def can_execute(self) -> bool:
+        return self.from_user().user_id == lampo
+
     def scrivi(self) -> Message:
         return self.bot.forward_message(sara, self.update.message.chat, self.update.message)
 
@@ -105,7 +108,7 @@ class Lampo(Command):
             return self.answer("Non ci sono traduzioni per {}".format(parola))
 
     def whatismyip(self) -> Message:
-        return self.bot.dump(ip=requests.get("http://ipinfo.io?").json())
+        return self.bot.debug(ip=requests.get("http://ipinfo.io?").json())
 
     def server_time(self):
         return self.answer(str(DateTime.by_now()))

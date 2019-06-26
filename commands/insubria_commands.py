@@ -1,12 +1,13 @@
+import logging
 from dataclasses import dataclass
 from typing import Dict, List
 
 import bs4
-import logging
 
 from commands.commands import Command
+from telegram.ids import sara, lampo
 from telegram.wrappers import InlineKeyboard, InlineButton, Message
-from utils import WebScraper, Date, Time, chunks, DateTime
+from utils import WebScraper, Date, Time
 
 edifici: Dict = {}
 
@@ -83,26 +84,28 @@ def get_timeline(edificio) -> bool:
 class Insubria(Command):
     driver = None
 
+    def can_execute(self) -> bool:
+        return self.from_user().user_id == lampo or self.from_user().user_id == sara
+
     def aule(self) -> Message:
         if not len(self.params()):
-            keyboard = InlineKeyboard()
-            keyboard.add(1, InlineButton("Monte generoso", "/{} mtg".format(self.command())))
-            keyboard.add(2, InlineButton("Morselli", "/{} mrs".format(self.command())))
-            keyboard.add(3, InlineButton("Seppilli", "/{} sep".format(self.command())))
+            keyboard = InlineKeyboard(1)
+            keyboard.add(
+                InlineButton("Monte generoso", "/{} mtg".format(self.command())),
+                InlineButton("Morselli", "/{} mrs".format(self.command())),
+                InlineButton("Seppilli", "/{} sep".format(self.command()))
+            )
 
             return self.answer("Scegli l'edificio:", keyboard)
         elif len(self.params()) == 1:
             edificio = self.params()[0]
             now = Time.now()
-            keyboard = InlineKeyboard()
-            i = 0
-            for ore in chunks(list(range(0, 20 - now.hour)), 3):
-                for ora in ore:
-                    ora = ora + now.hour
-                    keyboard.add(i, InlineButton("{}".format(str(Time(hour=ora))),
-                                                 "/{} {} {}".format(self.command(), edificio, ora)))
-                i += 1
-            keyboard.add(i, InlineButton("Adesso", "/{} {} {}".format(self.command(), edificio, now)))
+            keyboard = InlineKeyboard(3)
+            for ora in list(range(0, 20 - now.hour)):
+                ora = ora + now.hour
+                keyboard.add(InlineButton("{}".format(str(Time(hour=ora))),
+                                          "/{} {} {}".format(self.command(), edificio, ora)))
+            keyboard.add_next_line(InlineButton("Adesso", "/{} {} {}".format(self.command(), edificio, now)))
 
             return self.replace("Per che ora vuoi controllare se ci sono aule libere?", keyboard)
         else:
@@ -143,9 +146,11 @@ class Insubria(Command):
     def timeline(self) -> Message:
         if not len(self.params()):
             keyboard = InlineKeyboard()
-            keyboard.add(1, InlineButton("Monte generoso", "/{} mtg".format(self.command())))
-            keyboard.add(2, InlineButton("Morselli", "/{} mrs".format(self.command())))
-            keyboard.add(3, InlineButton("Seppilli", "/{} sep".format(self.command())))
+            keyboard.add(
+                InlineButton("Monte generoso", "/{} mtg".format(self.command())),
+                InlineButton("Morselli", "/{} mrs".format(self.command())),
+                InlineButton("Seppilli", "/{} sep".format(self.command()))
+            )
 
             return self.answer("Scegli l'edificio:", keyboard)
         else:
@@ -154,16 +159,13 @@ class Insubria(Command):
             if not get_timeline(edificio):
                 return self.replace("Errore caricamento timeline. Riprova!")
             if len(self.params()) == 1:
-                keyboard = InlineKeyboard()
+                keyboard = InlineKeyboard(3)
                 aule = edifici[edificio]['aule']
-                i = 0
-                for aule in chunks(aule, 3):  # massimo 3 aule per riga
-                    for aula in aule:
-                        keyboard.add(i, InlineButton("{}".format(aula['nome']),
-                                                     "/{} {} {}".format(self.command(), edificio, aula['nome'])))
-                    i += 1
-                keyboard.add(i, InlineButton("Tutte le aule",
-                                             "/{} {} tutte".format(self.command(), edificio)))
+                for aula in aule:
+                    keyboard.add(InlineButton("{}".format(aula['nome']),
+                                              "/{} {} {}".format(self.command(), edificio, aula['nome'])))
+                keyboard.add_next_line(InlineButton("Tutte le aule",
+                                                    "/{} {} tutte".format(self.command(), edificio)))
 
                 return self.replace("Scegli l'aula", keyboard)
             else:

@@ -11,6 +11,16 @@ class Command:
     bot: Bot
     update: Update
 
+    def can_execute(self) -> bool:
+        return False
+
+    def get_commands(self) -> List[str]:
+        return [
+            command for command in dir(self)
+            if not command.startswith("_") and not command.startswith("can") and callable(
+                getattr(self, command)) and command in type(self).__dict__
+        ]
+
     def command(self):
         return self.update.message.command
 
@@ -18,7 +28,10 @@ class Command:
         return self.update.message.params
 
     def from_user(self) -> User:
-        return self.update.message.from_user
+        if self.update.message.reply_to:
+            return self.update.message.reply_to.from_user
+        else:
+            return self.update.message.from_user
 
     def answer(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:
         """
@@ -46,9 +59,15 @@ class Command:
     def error(self) -> Message:
         return self.answer("Il comando {} non esiste!".format(self.command()))
 
+    def unauthorized(self) -> Message:
+        """Non sei autorizzato ad usare questo comando né a conoscere i dettagli del suo utilizzo"""
+
+        return self.answer("Non sei autorizzato ad usare questo comando né a conoscere i dettagli del suo utilizzo!")
+
     def wrong(self, command: Callable[[], Dict]) -> Message:
         if not command.__doc__:
             self.bot.send_message(chat_id=lampo, text="Il comando {} non ha una doc!".format(command.__name__))
+
         return self.answer(
             "Hai usato male il comando {}. Le istruzioni per il comando sono:\n\n {}".format(command.__name__,
                                                                                              command.__doc__))

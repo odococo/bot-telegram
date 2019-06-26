@@ -1,11 +1,15 @@
 from dataclasses import dataclass
 
 from commands.commands import Command
+from telegram.ids import lampo
 from telegram.wrappers import Message
 
 
 @dataclass
 class Loot(Command):
+    def can_execute(self) -> bool:
+        return self.from_user().user_id == lampo
+
     def pietre(self) -> Message:
         valori_pietre = {
             'Pietra Anima di Legno': 1,

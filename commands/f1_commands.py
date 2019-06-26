@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from commands.standard_commands import Standard
 from telegram.wrappers import InlineKeyboard, InlineButton, Message
-from utils import chunks, join, DateTime, get_json
+from utils import join, DateTime, get_json
 
 bandiere = {
 
@@ -46,19 +46,20 @@ class _Gara:
 class F1(Standard):
     url = "https://ergast.com/api/f1/current{}.json"
 
-    def _scelta_gara(self, attuale: bool = False) -> Message:
-        keyboard = InlineKeyboard()
-        i = 1
-        for gare in chunks(self._get_gare(), 3):
-            for gara in gare:
-                keyboard.add(i, InlineButton(
-                    "{}[{}]".format(gara.citta, gara.nazione),
-                    "/{} {} {}".format(self.command(), join(self.params(), " "), gara.round)))
-            i += 1
+    def _scelta_gara(self, attuale: bool = False, new: bool = True) -> Message:
+        keyboard = InlineKeyboard(3)
+        for gara in self._get_gare():
+            keyboard.add(InlineButton(
+                "{}[{}]".format(gara.citta, gara.nazione),
+                "/{} {} {}".format(self.command(), join(self.params(), " "), gara.round)))
         if attuale:
-            keyboard.add(i, InlineButton("Attuale", "/{} {} attuale".format(self.command(), join(self.params(), " "))))
+            keyboard.add_next_line(
+                InlineButton("Attuale", "/{} {} attuale".format(self.command(), join(self.params(), " "))))
 
-        return self.replace("Scegli la gara", keyboard)
+        if new:
+            return self.answer("Scegli la gara", keyboard)
+        else:
+            return self.replace("Scegli la gara", keyboard)
 
     def _get_url(self, *params):
         prefix = "/" if params else ""
@@ -98,14 +99,16 @@ class F1(Standard):
         else:
             return self._get_classifica_costruttori(classifica)
 
-    def _get_classifica_piloti(self, classifica: List) -> Dict:
+    @staticmethod
+    def _get_classifica_piloti(classifica: List) -> Dict:
         if not classifica:
             return {}
         classifica = classifica[0]['DriverStandings']
 
         return {pilota['Driver']['driverId']: pilota['points'] for pilota in classifica}
 
-    def _get_classifica_costruttori(self, classifica: List) -> Dict:
+    @staticmethod
+    def _get_classifica_costruttori(classifica: List) -> Dict:
         if not classifica:
             return {}
         classifica = classifica[0]['ConstructorStandings']
@@ -126,8 +129,10 @@ class F1(Standard):
     def classifica(self) -> Message:
         if not self.params():
             keyboard = InlineKeyboard()
-            keyboard.add(1, InlineButton("Classifica piloti", "/{} piloti".format(self.command())))
-            keyboard.add(2, InlineButton("Classifica costruttori", "/{} costruttori".format(self.command())))
+            keyboard.add(
+                InlineButton("Classifica piloti", "/{} piloti".format(self.command())),
+                InlineButton("Classifica costruttori", "/{} costruttori".format(self.command()))
+            )
 
             return self.answer("Scegli la classifica da visualizzare:", keyboard)
         elif len(self.params()) == 1:
@@ -138,7 +143,7 @@ class F1(Standard):
             classifica = self._get_classifica(scelta_classifica, scelta_gara)
             if not classifica:
                 return self.replace("La gara scelta non è ancora stata disputata!")
-            print(classifica)
+
             return self.replace(join(["{}: {}".format(nome, punti) for nome, punti in classifica.items()], "\n"))
 
     def apif1(self) -> Message:

@@ -11,9 +11,11 @@ from telegram.wrappers import Update, Chat, Message, Keyboard
 
 max_length = 2048
 
+
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
     scheduler: BackgroundScheduler = None
+
     #  scheduler = BackgroundScheduler(timezone=utc)
 
     def __init__(self, token: str):
@@ -34,8 +36,9 @@ class Bot:
         if request.ok:
             return request.json()['result']
         else:
-            print(request.json())
-            print(request.json().get('error', request.json().get('description', request.json())))
+            logging.warning("Errore!", request.json())
+            logging.warning("Descrizione",
+                            request.json().get('error', request.json().get('description', request.json())))
 
             return {}
 
@@ -109,16 +112,17 @@ class Bot:
         :param keyboard: la nuova tastiera da mostrare eventualmente
         :return:
         """
-        result = Message.from_dict(self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
-                                                  text=text[:max_length], parse_mode=parse_mode,
-                                                  reply_markup=keyboard.to_json()))
-        if not result.message_id:
-            return self.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode, keyboard=keyboard)
-        elif len(text) > max_length:
-            return self.send_message(chat_id=chat_id, text=text[max_length:], parse_mode=parse_mode,
-                                     reply_to=result.message_id)
-        else:
+        try:
+            result = Message.from_dict(self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
+                                                      text=text[:max_length], parse_mode=parse_mode,
+                                                      reply_markup=keyboard.to_json()))
+            if len(text) > max_length:
+                return self.send_message(chat_id=chat_id, text=text[max_length:], parse_mode=parse_mode,
+                                         reply_to=result.message_id)
+
             return result
+        except KeyError:
+            return self.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode, keyboard=keyboard)
 
     def forward_message(self, chat_id: int, from_chat: Chat, message: Message) -> Message:
         """

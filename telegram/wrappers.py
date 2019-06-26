@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Union
 
 from telegram.ids import sara, lootplus
-from utils import Date, DateTime
+from utils import DateTime
 
 
 @dataclass
@@ -191,13 +191,27 @@ class URLInlineButton(InlineButton):
 
 @dataclass
 class Keyboard:
-    buttons: Dict[int, List[Union[InlineButton]]] = None
+    buttons_per_row: int = 1
+    _current_row: int = 0
+    _current_button_per_row: int = 0
+    _buttons: Dict[int, List[Union[InlineButton]]] = None
 
-    def add(self, row: int, *buttons: Union[InlineButton]):
-        if not self.buttons:
-            self.buttons = collections.OrderedDict()
-        self.buttons.setdefault(row, [])
-        self.buttons[row] += buttons
+    def add(self, *buttons: Union[InlineButton]) -> None:
+        if not self._buttons:
+            self._buttons = collections.OrderedDict()
+        for button in buttons:
+            if self._current_button_per_row == 0:
+                self._buttons[self._current_row] = []
+            self._buttons[self._current_row].append(button)
+            self._current_button_per_row = (self._current_button_per_row + 1) % self.buttons_per_row
+            if self._current_button_per_row == 0:
+                self._current_row += 1
+
+    def add_next_line(self, *buttons: Union[InlineButton]) -> None:
+        self._current_row += 1
+        self._current_button_per_row = 0
+
+        self.add(*buttons)
 
     def to_dict(self) -> Dict:
         return {}
@@ -209,7 +223,7 @@ class Keyboard:
 @dataclass
 class InlineKeyboard(Keyboard):
     def to_dict(self):
-        return {'inline_keyboard': [[vars(button) for button in row] for row in self.buttons.values()]}
+        return {'inline_keyboard': [[vars(button) for button in row] for row in self._buttons.values()]}
 
 
 @dataclass

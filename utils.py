@@ -51,7 +51,6 @@ class DateTime(dt.datetime):
         microsecond = microsecond if microsecond is not None else now.microsecond
 
         date = DateTime(year, month, day, hour, minute, second, microsecond)
-        print(date)
         while date < now:
             if date.year < now.year:
                 date = date.add(years=1)
@@ -59,7 +58,7 @@ class DateTime(dt.datetime):
                 date = date.add(months=1)
             else:
                 date = date.add(days=1)
-        print(date)
+
         return date.to(cls)
 
     def to(self, cls: type):
