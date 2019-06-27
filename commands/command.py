@@ -22,8 +22,8 @@ def get_commands_list(bot: Bot, update: Update) -> List[Command]:
         Insubria(bot, update),
         Loot(bot, update),
         Cron(bot, update),
-        Lampo(bot, update),
-        Sara(bot, update)
+        Sara(bot, update),
+        Lampo(bot, update)
     ]
 
 

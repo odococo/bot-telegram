@@ -66,8 +66,8 @@ class Command:
 
     def wrong(self, command: Callable[[], Dict]) -> Message:
         if not command.__doc__:
-            self.bot.send_message(chat_id=lampo, text="Il comando {} non ha una doc!".format(command.__name__))
+            self.bot.send_message(chat_id=lampo, text="Il comando {} non ha una doc!".format(command))
 
         return self.answer(
-            "Hai usato male il comando {}. Le istruzioni per il comando sono:\n\n {}".format(command.__name__,
-                                                                                             command.__doc__))
+            "Hai usato male il comando {}!\n"
+            "Consulta le istruzioni di utilizzo tramite il comando <code>/doc {}</code>".format(command, command))

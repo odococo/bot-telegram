@@ -25,7 +25,7 @@ def polling(bot: Bot, last_update: int = 0, wait: int = 1):
             elif isinstance(update.message, Command):
                 execute(bot, update)
             elif update.message.chat.chat_id == lampo:
-                bot.dump(update=update.update)
+                bot.debug(update=update.update)
         last_update = updates[-1].update_id + 1 if len(updates) > 0 else last_update
         time.sleep(wait)
 
