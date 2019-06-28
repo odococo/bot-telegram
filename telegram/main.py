@@ -43,7 +43,7 @@ def cron_jobs(bot: Bot):
     bot.add_cron_job(lambda: _get_timelines(['mtg', 'mrs', 'sep']), single=False,
                      time_details={'start_date': Time.by_now_with(hour=0, minute=5), 'days': 1})
     bot.add_cron_job(lambda: _get_ip(bot), single=False, time_details={'hours': 4})
-    bot.add_cron_job(lambda: bot.send_message(sara, "Sono le 18.25"), single=False,
+    bot.add_cron_job(lambda: _send_memo(bot), single=False,
                      time_details={'start_date': Time.by_now_with(hour=18, minute=25), 'days': 1})
     _send_reminders(bot)
 
@@ -63,11 +63,16 @@ def _get_timelines(edifici: List[str]):
             logging.info("Ritento a consulare la timeline di {}".format(edificio))
 
 
+def _send_memo(bot: Bot):
+    bot.send_message(sara, "Sono le 18.25")
+    set_presa(False)
+
+
 def _send_reminders(bot: Bot):
     #  TODO se si mette un'ora fissa, l'invio verrà eseguito più volte
     #  tante quante riesce in quel minuto o secondo
     #  probabilmente specificando anche i microsecondi si riesce a eseguirlo una volta
-    hour = random.randint(18, 21)
+    hour = random.randint(21, 23)
     minute = random.randint(0, 59)
     bot.add_cron_job(lambda: _send_reminder(bot, hour, minute), single=True,
                      time_details={'run_date': Time.by_now_with(hour=hour, minute=minute)})
@@ -76,8 +81,8 @@ def _send_reminders(bot: Bot):
 
 
 def _send_reminder(bot: Bot, hour: int, minute: int):
-    bot.send_message(sara, "Forgot something? Sono le {}:{}".format(hour, minute))
-    set_presa(False)
+    if not get_presa():
+        bot.send_message(sara, "Forgot something? Sono le {}:{}".format(hour, minute))
     _send_reminders(bot)
 
 
