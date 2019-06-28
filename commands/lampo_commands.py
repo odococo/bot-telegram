@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import requests
 
 from commands.commands import Command
+from sara_commands import presa
 from telegram.ids import sara, lampo
 from telegram.wrappers import Message
 from utils import DateTime
@@ -87,6 +88,12 @@ class Lampo(Command):
 
     def scrivi(self) -> Message:
         return self.bot.forward_message(sara, self.update.message.chat, self.update.message)
+
+    def ricorda(self) -> Message:
+        if presa:
+            return self.answer("Sembra l'abbia presa")
+        else:
+            return self.bot.send_message(chat_id=sara, text="Saraaaaaaaaaaaaaa non dimenticartelaaaaaaaaaaaaaaa")
 
     def test(self) -> Message:
         return self.bot.forward_message(lampo, self.update.message.chat, self.update.message)

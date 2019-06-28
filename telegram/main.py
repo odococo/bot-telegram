@@ -7,12 +7,15 @@ import requests
 
 from commands.command import execute
 from commands.insubria_commands import get_timeline
+from sara_commands import set_presa, get_presa
 from telegram.bot import Bot
 from telegram.ids import lampo, sara
 from telegram.wrappers import Command
-from utils import Time
+from utils import Time, get_json
 
 logging.basicConfig(level=logging.INFO)
+
+last_ip = -1
 
 
 def polling(bot: Bot, last_update: int = 0, wait: int = 1):
@@ -38,9 +41,17 @@ def discard(bot: Bot):
 def cron_jobs(bot: Bot):
     bot.add_cron_job(lambda: _get_timelines(['mtg', 'mrs', 'sep']), single=False,
                      time_details={'start_date': Time.by_now_with(hour=0, minute=5), 'days': 1})
-    bot.add_cron_job(lambda: bot.debug(ip=requests.get("http://ipinfo.io?").json()), single=False,
-                     time_details={'hours': 4})
+    bot.add_cron_job(_get_ip(bot), single=False, time_details={'hours': 4})
     _send_reminders(bot)
+
+
+def _get_ip(bot: Bot):
+    global last_ip
+
+    ip = get_json("http://ipinfo.io?")['ip']
+    if ip != last_ip:
+        last_ip = ip
+        bot.debug("L'ip è cambiato: {}".format(ip))
 
 
 def _get_timelines(edifici: List[str]):
@@ -53,15 +64,23 @@ def _send_reminders(bot: Bot):
     #  TODO se si mette un'ora fissa, l'invio verrà eseguito più volte
     #  tante quante riesce in quel minuto o secondo
     #  probabilmente specificando anche i microsecondi si riesce a eseguirlo una volta
-    hour = random.randint(19, 23)
+    hour = random.randint(18, 21)
     minute = random.randint(0, 59)
     bot.add_cron_job(lambda: _send_reminder(bot, hour, minute), single=True,
                      time_details={'run_date': Time.by_now_with(hour=hour, minute=minute)})
+    bot.add_cron_job(lambda: _check_presa(bot), single=True,
+                     time_details={'run_date': Time.by_now_with(hour=hour, minute=(minute + 10) % 60)})
 
 
 def _send_reminder(bot: Bot, hour: int, minute: int):
     bot.send_message(sara, "Forgot something? Sono le {}:{}".format(hour, minute))
+    set_presa(False)
     _send_reminders(bot)
+
+
+def _check_presa(bot: Bot):
+    if not get_presa():
+        bot.send_message(lampo, "Ricordale di prenderla!")
 
 
 def main():

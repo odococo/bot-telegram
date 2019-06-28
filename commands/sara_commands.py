@@ -4,6 +4,16 @@ from commands.command import Command
 from telegram.ids import lampo, sara
 from telegram.wrappers import Message
 
+presa = False
+
+
+def get_presa() -> bool:
+    return presa
+
+
+def set_presa(b: bool):
+    presa = b
+
 
 @dataclass
 class Sara(Command):
@@ -11,6 +21,9 @@ class Sara(Command):
         return self.from_user().user_id == sara
 
     def scrivi(self) -> Message:
+        if not get_presa() and "presa" in self.update.message.text.lower():
+            set_presa(True)
+
         return self.bot.forward_message(lampo, self.update.message.chat, self.update.message)
 
     def tesoro(self, command: str) -> Message:

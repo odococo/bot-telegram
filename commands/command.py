@@ -11,7 +11,7 @@ from commands.sara_commands import Sara
 from commands.standard_commands import Standard
 from telegram.bot import Bot
 from telegram.ids import sara
-from telegram.wrappers import Update, Message
+from telegram.wrappers import Update
 
 
 def get_commands_list(bot: Bot, update: Update) -> List[Command]:
