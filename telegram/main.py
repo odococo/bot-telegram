@@ -54,7 +54,7 @@ def _get_ip(bot: Bot):
     ip = get_json("http://ipinfo.io?")['ip']
     if ip != last_ip:
         last_ip = ip
-        bot.debug("L'ip \u00e8 cambiato: {}".format(ip))
+        bot.send_message(lampo, "L'ip è cambiato: {}".format(ip))
 
 
 def _get_timelines(edifici: List[str]):
