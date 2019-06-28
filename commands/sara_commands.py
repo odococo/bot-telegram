@@ -4,7 +4,7 @@ from commands.command import Command
 from telegram.ids import lampo, sara
 from telegram.wrappers import Message
 
-presa = False
+presa = True
 
 
 def get_presa() -> bool:

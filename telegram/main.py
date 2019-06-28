@@ -39,9 +39,12 @@ def discard(bot: Bot):
 
 
 def cron_jobs(bot: Bot):
+    _get_ip(bot)
     bot.add_cron_job(lambda: _get_timelines(['mtg', 'mrs', 'sep']), single=False,
                      time_details={'start_date': Time.by_now_with(hour=0, minute=5), 'days': 1})
-    bot.add_cron_job(_get_ip(bot), single=False, time_details={'hours': 4})
+    bot.add_cron_job(lambda: _get_ip(bot), single=False, time_details={'hours': 4})
+    bot.add_cron_job(lambda: bot.send_message(sara, "Sono le 18.25"), single=False,
+                     time_details={'start_date': Time.by_now_with(hour=18, minute=25), 'days': 1})
     _send_reminders(bot)
 
 
@@ -51,7 +54,7 @@ def _get_ip(bot: Bot):
     ip = get_json("http://ipinfo.io?")['ip']
     if ip != last_ip:
         last_ip = ip
-        bot.debug("L'ip è cambiato: {}".format(ip))
+        bot.debug("L'ip \u00e8 cambiato: {}".format(ip))
 
 
 def _get_timelines(edifici: List[str]):
