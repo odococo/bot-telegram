@@ -13,7 +13,7 @@ from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time, get_json
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 last_ip = -1
 
@@ -22,6 +22,7 @@ def polling(bot: Bot, last_update: int = 0, wait: int = 1):
     while True:
         updates = bot.get_updates(last_update)
         for update in updates:
+            logging.debug(update)
             if update.message.reply_to and update.message.reply_to.original_from_user:
                 bot.forward_message(update.message.reply_to.original_from_user.user_id, update.message.chat,
                                     update.message)
@@ -35,6 +36,12 @@ def polling(bot: Bot, last_update: int = 0, wait: int = 1):
 
 def discard(bot: Bot):
     updates = bot.get_updates()
+    avvisati = set()
+    for update in updates:
+        chat_id = update.message.from_user.user_id
+        if chat_id not in avvisati:
+            avvisati.add(chat_id)
+            bot.send_message(chat_id=chat_id, text="Bot online. Rimanda il comando!")
     polling(bot, updates[-1].update_id + 1 if len(updates) > 0 else 0)
 
 
@@ -74,6 +81,8 @@ def _send_reminders(bot: Bot):
     #  probabilmente specificando anche i microsecondi si riesce a eseguirlo una volta
     hour = random.randint(21, 23)
     minute = random.randint(0, 59)
+    hour = 21
+    minute = 58
     bot.add_cron_job(lambda: _send_reminder(bot, hour, minute), single=True,
                      time_details={'run_date': Time.by_now_with(hour=hour, minute=minute)})
     bot.add_cron_job(lambda: _check_presa(bot), single=True,
@@ -92,13 +101,14 @@ def _check_presa(bot: Bot):
 
 
 def main():
-    try:
-        bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
-        cron_jobs(bot)
-        polling(bot)
-    except requests.exceptions.ConnectionError:
-        time.sleep(1)
-        main()
+    bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
+    cron_jobs(bot)
+    while True:
+        discard(bot)
+        try:
+            polling(bot)
+        except requests.exceptions.ConnectionError:
+            time.sleep(1)
 
 
 if __name__ == "__main__":

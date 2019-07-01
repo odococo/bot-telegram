@@ -3,7 +3,7 @@ from typing import List, Dict, Callable
 
 from telegram.bot import Bot
 from telegram.ids import lampo
-from telegram.wrappers import Update, Keyboard, Message, User
+from telegram.wrappers import Update, Keyboard, Message, User, Chat
 
 
 @dataclass
@@ -32,6 +32,9 @@ class Command:
             return self.update.message.reply_to.from_user
         else:
             return self.update.message.from_user
+
+    def from_chat(self) -> Chat:
+        return self.update.message.chat
 
     def answer(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:
         """

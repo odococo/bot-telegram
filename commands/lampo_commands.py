@@ -80,7 +80,6 @@ traduzioni = {
     'nënt': "nove"
 }
 
-
 @dataclass
 class Lampo(Command):
     def can_execute(self) -> bool:
@@ -117,9 +116,35 @@ class Lampo(Command):
     def whatismyip(self) -> Message:
         return self.bot.debug(ip=requests.get("http://ipinfo.io?").json())
 
-    def server_time(self):
+    def server_time(self) -> Message:
         return self.answer(str(DateTime.by_now()))
 
-    def getavvisi(self):
+    def getavvisi(self) -> Message:
         return self.answer("\n".join(
             ["id: <code>{}</code> ==> {}".format(job.id, job.next_run_time) for job in self.bot.scheduler.get_jobs()]))
+
+    def clear_messages(self) -> Message:
+        chat_id = None
+        last_message_id = None
+        how_many = None
+
+        if self.params():
+            chat_id = int(self.params()[0])
+            if len(self.params()) == 1:
+                last_message_id = int(self.params()[1])
+            if len(self.params()) == 2:
+                how_many = int(self.params()[2])
+
+        chat_id = chat_id or self.from_chat().chat_id
+        last_message_id = last_message_id or self.update.message.message_id
+        how_many = how_many or 10000
+        cancellati = 0
+
+        for i in range(0, how_many):
+            result = self.bot.delete_message(chat_id, last_message_id - i)
+            if result:
+                cancellati += 1
+            elif result is None:
+                break
+
+        return self.answer("Messaggi cancellati: {}".format(cancellati))

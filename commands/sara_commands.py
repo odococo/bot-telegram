@@ -12,6 +12,8 @@ def get_presa() -> bool:
 
 
 def set_presa(b: bool):
+    global presa
+
     presa = b
 
 

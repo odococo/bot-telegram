@@ -15,6 +15,7 @@ max_length = 2048
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
     scheduler: BackgroundScheduler = None
+    last_exception = None
 
     #  scheduler = BackgroundScheduler(timezone=utc)
 
@@ -36,9 +37,10 @@ class Bot:
         if request.ok:
             return request.json()['result']
         else:
-            logging.warning("Errore!", request.json())
-            logging.warning("Descrizione",
-                            request.json().get('error', request.json().get('description', request.json())))
+            logging.warning(request.json())
+            error = request.json().get('error', request.json().get('description', request.json()))
+            self.last_exception = error
+            logging.warning(error)
 
             return {}
 
@@ -88,17 +90,21 @@ class Bot:
         :param keyboard: tastiera da mostrare eventualmente
         :return:
         """
-        while len(text) > max_length:
-            index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
-            result = Message.from_dict(
-                self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
-                               parse_mode=parse_mode, reply_to_message_id=reply_to))
-            text = text[index:]
-            reply_to = result.message_id if result.message_id else None
+        try:
+            while len(text) > max_length:
+                index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
+                result = Message.from_dict(
+                    self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
+                                   parse_mode=parse_mode, reply_to_message_id=reply_to))
+                text = text[index:]
+                reply_to = result.message_id if result.message_id else None
 
-        return Message.from_dict(
-            self.__execute("sendMessage", chat_id=chat_id, text=text,
-                           parse_mode=parse_mode, reply_to_message_id=reply_to, reply_markup=keyboard.to_json()))
+            return Message.from_dict(
+                self.__execute("sendMessage", chat_id=chat_id, text=text,
+                               parse_mode=parse_mode, reply_to_message_id=reply_to, reply_markup=keyboard.to_json()))
+        except KeyError:
+            #  non esiste messaggio a cui fare reply
+            return self.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode, keyboard=keyboard)
 
     def edit_message(self, chat_id: int, message_id: int, text: str, parse_mode: str = "HTML",
                      keyboard: Keyboard = Keyboard()) -> Message:
@@ -135,3 +141,19 @@ class Bot:
         """
         return Message.from_dict(self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id,
                                                 message_id=message.message_id))
+
+    def delete_message(self, chat_id: int, message_id: int) -> Union[bool, None]:
+        """
+        Cancella un messaggio
+
+        :param chat_id: chat dov'è presente il messaggio da cancellare
+        :param message_id: id del messaggio da cancellare
+        """
+        result = self.__execute("deleteMessage", chat_id=chat_id, message_id=message_id)
+        if bool(result):
+            return True
+        else:
+            if self.last_exception == "Bad Request: message can't be deleted":
+                return None
+            else:
+                return False

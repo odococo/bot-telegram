@@ -31,7 +31,7 @@ def get_command_instance(cls: str, bot: Bot, update: Update):
     return globals()[cls](bot, update)
 
 
-def get_command(bot: Bot, update: Update, command: str):
+def get_command(bot: Bot, update: Update, command: str) -> callable:
     commands = get_commands_list(bot, update)
     default = Command(bot, update)
     for command_type in commands:
@@ -53,7 +53,7 @@ def get_command(bot: Bot, update: Update, command: str):
 def execute(bot: Bot, update: Update):
     command = update.message.command
     try:
-        get_command(bot, update, command)()
+        logging.debug(get_command(bot, update, command)())
     except Exception as e:
         logging.exception(e)
         getattr(Command(bot, update), "wrong")(command)
