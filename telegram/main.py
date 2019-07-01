@@ -13,7 +13,7 @@ from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time, get_json
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 last_ip = -1
 
