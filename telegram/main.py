@@ -7,8 +7,7 @@ import requests
 
 from commands.command import execute
 from commands.insubria_commands import get_timeline
-from sara_commands import set_presa, get_presa
-from telegram.bot import Bot
+from telegram.bot import Bot, params
 from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time, get_json
@@ -72,7 +71,7 @@ def _get_timelines(edifici: List[str]):
 
 def _send_memo(bot: Bot):
     bot.send_message(sara, "Sono le 18.25")
-    set_presa(False)
+    params['presa'] = False
 
 
 def _send_reminders(bot: Bot):
@@ -90,13 +89,13 @@ def _send_reminders(bot: Bot):
 
 
 def _send_reminder(bot: Bot, hour: int, minute: int):
-    if not get_presa():
+    if not params['presa']:
         bot.send_message(sara, "Forgot something? Sono le {}:{}".format(hour, minute))
     _send_reminders(bot)
 
 
 def _check_presa(bot: Bot):
-    if not get_presa():
+    if not params['presa']:
         bot.send_message(lampo, "Ricordale di prenderla!")
 
 

@@ -11,6 +11,10 @@ from telegram.wrappers import Update, Chat, Message, Keyboard
 
 max_length = 2048
 
+params = {
+    'presa': True
+}
+
 
 class Bot:
     url = "https://api.telegram.org/bot{token}/{method}"
