@@ -66,7 +66,7 @@ def _get_ip(bot: Bot):
 def _get_timelines(edifici: List[str]):
     for edificio in edifici:
         while not get_timeline(edificio):
-            logging.info("Ritento a consulare la timeline di {}".format(edificio))
+            logging.info("Ritento a consultare la timeline di {}".format(edificio))
 
 
 def _send_memo(bot: Bot):
@@ -107,7 +107,7 @@ def main():
         try:
             polling(bot)
         except requests.exceptions.ConnectionError:
-            time.sleep(1)
+            time.sleep(10)
 
 
 if __name__ == "__main__":
