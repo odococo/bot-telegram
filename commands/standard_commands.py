@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from commands import command as c
 from commands.commands import Command
-from telegram.wrappers import InlineKeyboard, InlineButton, Message, PrivateChat
+from telegram.wrappers import InlineKeyboard, InlineButton, Message, Private
 from utils import join
 
 
@@ -99,7 +99,7 @@ class Standard(Command):
 
     def whereami(self) -> Message:
         chat = self.update.message.chat
-        if isinstance(chat, PrivateChat):
+        if isinstance(chat, Private):
             return self.answer(
                 "ID: <code>{}</code>\n"
                 "First name: <code>{}</code>\n"
@@ -109,8 +109,14 @@ class Standard(Command):
             return self.answer(
                 "ID: <code>{}</code>\n"
                 "Title: <code>{}</code>\n"
-                "Supergruppo: <code>{}</code>\n"
-                "Username: <code>{}</code>".format(chat.chat_id, chat.title, chat.supergroup, chat.username))
+                "Tipo: <code>{}</code>\n"
+                "Username: <code>{}</code>".format(chat.chat_id, chat.title, chat.__class__, chat.username))
+
+    def scrivi(self) -> Message:
+        to = int(self.params()[0])
+        text = join(self.params()[1:], " ")
+
+        return self.send(to, text)
 
     def help(self) -> Message:
         if not self.params():

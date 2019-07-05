@@ -9,50 +9,78 @@ from utils import DateTime
 
 @dataclass
 class Chat:
-    chat_id: int
-    username: str
+    chat_id: int = None
+    username: str = None
 
     @classmethod
-    def from_dict(cls, chat: Dict) -> 'Chat':
+    def factory(cls, chat: Dict) -> Union['Private', 'Group', 'SuperGroup', 'Channel']:
         if chat['type'] == "private":
-            return PrivateChat.from_dict(chat)
-        elif chat['type'] == 'group' or chat['type'] == 'supergroup':
-            return GroupChat.from_dict(chat)
+            return Private.from_dict(chat)
         else:
-            chat_id = chat['id']
-            username = chat.get('username', '')
+            return Multi.factory(chat)
 
-            return cls(chat_id, username)
+    @classmethod
+    def get_chat(cls, chat: Dict):
+        chat_id = chat['id']
+        username = chat.get('username', '')
+
+        return cls(chat_id, username)
 
 
 @dataclass
-class PrivateChat(Chat):
-    first_name: str
-    last_name: str
+class Private(Chat):
+    first_name: str = None
+    last_name: str = None
 
     @classmethod
-    def from_dict(cls, chat: Dict) -> 'PrivateChat':
-        chat_id = chat['id']
-        first_name = chat['first_name']
-        last_name = chat.get('last_name', '')
-        username = chat.get('username', '')
+    def from_dict(cls, chat: Dict) -> 'Private':
+        self = cls.get_chat(chat)
+        self.first_name = chat['first_name']
+        self.last_name = chat.get('last_name', '')
 
-        return cls(chat_id, first_name, last_name, username)
+        return self
 
 
 @dataclass
-class GroupChat(Chat):
-    title: str
-    supergroup: bool
+class Multi(Chat):
+    title: str = None
 
     @classmethod
-    def from_dict(cls, chat: Dict) -> 'GroupChat':
-        chat_id = chat['id']
-        title = chat['title']
-        supergroup = chat['type'] == "supergroup"
-        username = chat.get('username', '')
+    def factory(cls, chat: Dict) -> Union['Group', 'SuperGroup', 'Channel']:
+        if chat['type'] == "group":
+            return Group.from_dict(chat)
+        elif chat['type'] == "supergroup":
+            return SuperGroup.from_dict(chat)
+        else:
+            return Channel.from_dict(chat)
 
-        return cls(chat_id, title, supergroup, username)
+    @classmethod
+    def get_multi_chat(cls, chat: Dict):
+        self = cls.get_chat(chat)
+        self.title = chat['title']
+
+        return self
+
+
+@dataclass
+class Group(Multi):
+    @classmethod
+    def from_dict(cls, chat: Dict) -> 'Group':
+        return cls.get_multi_chat(chat)
+
+
+@dataclass
+class SuperGroup(Multi):
+    @classmethod
+    def from_dict(cls, chat: Dict) -> 'SuperGroup':
+        return cls.get_multi_chat(chat)
+
+
+@dataclass
+class Channel(Multi):
+    @classmethod
+    def from_dict(cls, chat: Dict) -> 'Channel':
+        return cls.get_multi_chat(chat)
 
 
 @dataclass
@@ -69,7 +97,14 @@ class User:
         return self.user_id == other.user_id
 
     @classmethod
-    def from_dict(cls, user: Dict) -> 'User':
+    def factory(cls, user: Dict) -> Union['User']:
+        if user['is_bot']:
+            return Bot.from_dict(user)
+        else:
+            return User.from_dict(user)
+
+    @classmethod
+    def get_user(cls, user: Dict):
         user_id = user['id']
         first_name = user['first_name']
         last_name = user.get('last_name', '')
@@ -77,105 +112,101 @@ class User:
 
         return cls(user_id, first_name, last_name, username)
 
+    @classmethod
+    def from_dict(cls, user: Dict) -> 'User':
+        return User.get_user(user)
+
+
+@dataclass
+class Bot(User):
+    @classmethod
+    def from_dict(cls, user: Dict) -> 'Bot':
+        return Bot.get_user(user)
+
 
 @dataclass
 class Message:
-    message_id: int
-    chat: Union[Chat, PrivateChat, GroupChat]
-    when: DateTime
-    from_user: User
-    reply_to: 'Message'
-    original_when: DateTime
-    original_from_user: User
+    message_id: int = None
+    chat: Union[Chat, Private, Group, SuperGroup, Channel] = None
+    when: DateTime = None
+    reply_to: 'Message' = None
+    original_when: DateTime = None
+    original_from_user: User = None
+    from_user: User = None
+
+    @classmethod
+    def factory(cls, message: Dict) -> 'Message':
+        if 'text' in message:
+            return TextMessage.factory(message)
+        else:
+            return Message.from_dict(message)
+
+    @classmethod
+    def get_message(cls, message: Dict):
+        message_id = message['message_id']
+        chat = Chat.factory(message['chat'])
+        when = DateTime.from_millis(message['date'])
+        self = cls(message_id, chat, when)
+        if 'reply_to_message' in message:
+            self.reply_to = Message.factory(message['reply_to_message'])
+        if 'forward_date' in message:
+            self.original_when = DateTime.from_millis(message['forward_date'])
+            self.original_from_user = User.factory(message['forward_from'])
+        if 'from' in message:
+            self.from_user = User.factory(message['from'])
+
+        return self
 
     @classmethod
     def from_dict(cls, message: Dict) -> 'Message':
-        if 'text' in message:
-            text = message['text']
-            if text[0] == "." or text[0] == "!" or text[0] == "/":
-                return Command.from_dict(message)
-            elif message['chat']['id'] == sara:
-                message['text'] = "/scrivi " + message.get('text', "")
-
-                return Command.from_dict(message)
-            elif message.get('forward_from', {'id': -1})['id'] == lootplus:
-                message['text'] = "/pietre " + message.get('text', "")
-
-                return Command.from_dict(message)
-            else:
-                return TextMessage.from_dict(message)
-        else:
-            message_id = message['message_id']
-            chat = Chat.from_dict(message['chat'])
-            when = DateTime.from_millis(message['date'])
-            from_user = User.from_dict(message['from'])
-            if 'reply_to_message' in message:
-                reply_to = Message.from_dict(message['reply_to_message'])
-            else:
-                reply_to = None
-            if 'forward_date' in message:
-                original_when = DateTime.from_millis(message['forward_date'])
-                original_from_user = User.from_dict(message['forward_from'])
-            else:
-                original_when = None
-                original_from_user = None
-
-            return cls(message_id, chat, when, from_user, reply_to, original_when, original_from_user)
+        return Message.get_message(message)
 
 
 @dataclass
 class TextMessage(Message):
-    text: str
+    text: str = None
+
+    @classmethod
+    def factory(cls, message: Dict) -> Union['TextMessage', 'Command']:
+        text = message['text']
+        if text[0] == "." or text[0] == "!" or text[0] == "/":
+            return Command.from_dict(message)
+        elif message['chat']['id'] == sara:
+            message['text'] = "/amore " + message.get('text', "")
+
+            return Command.from_dict(message)
+        elif message.get('forward_from', {'id': -1})['id'] == lootplus:
+            message['text'] = "/pietre " + message.get('text', "")
+
+            return Command.from_dict(message)
+        else:
+            return TextMessage.from_dict(message)
+
+    @classmethod
+    def get_text_message(cls, message: Dict):
+        self = cls.get_message(message)
+        self.text = message['text']
+
+        return self
 
     @classmethod
     def from_dict(cls, message: Dict) -> 'TextMessage':
-        message_id = message['message_id']
-        chat = Chat.from_dict(message['chat'])
-        when = DateTime.from_millis(message['date'])
-        from_user = User.from_dict(message['from'])
-        text = message['text']
-        if 'reply_to_message' in message:
-            reply_to = Message.from_dict(message['reply_to_message'])
-        else:
-            reply_to = None
-        if 'forward_date' in message:
-            original_when = DateTime.from_millis(message['forward_date'])
-            original_from_user = User.from_dict(message['forward_from'])
-        else:
-            original_when = None
-            original_from_user = None
-
-        return cls(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text)
+        return TextMessage.get_message(message)
 
 
 @dataclass
 class Command(TextMessage):
-    command: str
-    params: List[str]
+    command: str = None
+    params: List[str] = None
 
     @classmethod
     def from_dict(cls, message: Dict) -> 'Command':
-        message_id = message['message_id']
-        chat = Chat.from_dict(message['chat'])
-        when = DateTime.from_millis(message['date'])
-        from_user = User.from_dict(message['from'])
-        if 'reply_to_message' in message:
-            reply_to = Message.from_dict(message['reply_to_message'])
-        else:
-            reply_to = None
-        if 'forward_date' in message:
-            original_when = DateTime.from_millis(message['forward_date'])
-            original_from_user = User.from_dict(message['forward_from'])
-        else:
-            original_when = None
-            original_from_user = None
-        text = message['text']
+        self = Command.get_text_message(message)
         _text = str(message['text']).split()
-        command = _text[0][1:]
-        params = _text[1:]
+        self.command = _text[0][1:]
+        self.params = _text[1:]
 
-        return cls(message_id, chat, when, from_user, reply_to, original_when, original_from_user, text, command,
-                   params)
+        return self
 
 
 @dataclass
@@ -242,9 +273,11 @@ class Update:
         elif 'callback_query' in update:
             message = update['callback_query']['message']
             message['text'] = update['callback_query']['data']
+        elif 'channel_post' in update:
+            message = update['channel_post']
         else:
             raise ValueError('Il messaggio non e\' valido {}'.format(update))
 
-        message = Message.from_dict(message)
+        message = Message.factory(message)
 
         return cls(update, update_id, message)

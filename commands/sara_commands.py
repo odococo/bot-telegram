@@ -11,7 +11,7 @@ class Sara(Command):
     def can_execute(self) -> bool:
         return self.from_user().user_id == sara
 
-    def scrivi(self) -> Message:
+    def amore(self) -> Message:
         if not params['presa'] and "presa" in self.update.message.text.lower():
             params['presa'] = True
 

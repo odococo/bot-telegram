@@ -86,7 +86,7 @@ class Lampo(Command):
     def can_execute(self) -> bool:
         return self.from_user().user_id == lampo
 
-    def scrivi(self) -> Message:
+    def amore(self) -> Message:
         return self.bot.forward_message(sara, self.update.message.chat, self.update.message)
 
     def ricorda(self) -> Message:

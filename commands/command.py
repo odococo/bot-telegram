@@ -10,7 +10,7 @@ from commands.loot_commands import Loot
 from commands.sara_commands import Sara
 from commands.standard_commands import Standard
 from telegram.bot import Bot
-from telegram.ids import sara
+from telegram.ids import sara, logs
 from telegram.wrappers import Update
 
 
@@ -56,4 +56,5 @@ def execute(bot: Bot, update: Update):
         logging.debug(get_command(bot, update, command)())
     except Exception as e:
         logging.exception(e)
+        bot.dump(to=logs, update=update, exception=str(e))
         getattr(Command(bot, update), "wrong")(command)

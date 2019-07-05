@@ -36,6 +36,18 @@ class Command:
     def from_chat(self) -> Chat:
         return self.update.message.chat
 
+    def send(self, to: int, text: str, keyboard: Keyboard = Keyboard()) -> Message:
+        """
+        Risponde all'utente che ha eseguito il comando
+
+        :param to: a chi mandare il messaggio
+        :param text: testo di risposta
+        :param keyboard: eventuale tastiera
+        :return:
+        """
+        return self.bot.send_message(chat_id=to, text=text,
+                                     reply_to=self.update.message.message_id, keyboard=keyboard)
+
     def answer(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:
         """
         Risponde all'utente che ha eseguito il comando
@@ -44,7 +56,7 @@ class Command:
         :param keyboard: eventuale tastiera
         :return:
         """
-        return self.bot.send_message(chat_id=self.update.message.chat.chat_id, text=text,
+        return self.bot.send_message(chat_id=self.from_chat().chat_id, text=text,
                                      reply_to=self.update.message.message_id, keyboard=keyboard)
 
     def replace(self, text: str, keyboard: Keyboard = Keyboard()) -> Message:

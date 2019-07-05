@@ -45,8 +45,7 @@ class Bot:
             error = request.json().get('error', request.json().get('description', request.json()))
             self.last_exception = error
             logging.warning(error)
-
-            return {}
+            raise Exception(error)
 
     def add_cron_job(self, function: callable, single: bool,
                      time_details: Dict[str, Union[int, datetime.datetime]]) -> str:
@@ -97,13 +96,13 @@ class Bot:
         try:
             while len(text) > max_length:
                 index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
-                result = Message.from_dict(
+                result = Message.factory(
                     self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
                                    parse_mode=parse_mode, reply_to_message_id=reply_to))
                 text = text[index:]
                 reply_to = result.message_id if result.message_id else None
 
-            return Message.from_dict(
+            return Message.factory(
                 self.__execute("sendMessage", chat_id=chat_id, text=text,
                                parse_mode=parse_mode, reply_to_message_id=reply_to, reply_markup=keyboard.to_json()))
         except KeyError:
@@ -123,9 +122,9 @@ class Bot:
         :return:
         """
         try:
-            result = Message.from_dict(self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
-                                                      text=text[:max_length], parse_mode=parse_mode,
-                                                      reply_markup=keyboard.to_json()))
+            result = Message.factory(self.__execute("editMessageText", chat_id=chat_id, message_id=message_id,
+                                                    text=text[:max_length], parse_mode=parse_mode,
+                                                    reply_markup=keyboard.to_json()))
             if len(text) > max_length:
                 return self.send_message(chat_id=chat_id, text=text[max_length:], parse_mode=parse_mode,
                                          reply_to=result.message_id)
@@ -143,8 +142,8 @@ class Bot:
         :param message: il messaggio da inoltrare
         :return:
         """
-        return Message.from_dict(self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id,
-                                                message_id=message.message_id))
+        return Message.factory(self.__execute("forwardMessage", chat_id=chat_id, from_chat_id=from_chat.chat_id,
+                                              message_id=message.message_id))
 
     def delete_message(self, chat_id: int, message_id: int) -> Union[bool, None]:
         """

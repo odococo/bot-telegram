@@ -37,10 +37,11 @@ def discard(bot: Bot):
     updates = bot.get_updates()
     avvisati = set()
     for update in updates:
-        chat_id = update.message.from_user.user_id
-        if chat_id not in avvisati:
-            avvisati.add(chat_id)
-            bot.send_message(chat_id=chat_id, text="Bot online. Rimanda il comando!")
+        if update.message.from_user:
+            chat_id = update.message.from_user.user_id
+            if chat_id not in avvisati:
+                avvisati.add(chat_id)
+                bot.send_message(chat_id=chat_id, text="Bot online. Rimanda il comando!")
     polling(bot, updates[-1].update_id + 1 if len(updates) > 0 else 0)
 
 
