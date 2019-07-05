@@ -1,5 +1,6 @@
 import datetime
 import json
+import jsonpickle
 import logging
 from typing import Dict, List, Union
 
@@ -8,6 +9,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from telegram.ids import lampo
 from telegram.wrappers import Update, Chat, Message, Keyboard
+
+jsonpickle.set_encoder_options('json', sort_keys=True, indent=4)
 
 max_length = 2048
 
@@ -60,8 +63,7 @@ class Bot:
         self.scheduler.remove_job(job_id)
 
     def dump(self, to: int, *args, **kwargs) -> Message:
-        return self.send_message(to, json.dumps(args, indent=2, sort_keys=True) + "\n" + json.dumps(kwargs, indent=2,
-                                                                                                    sort_keys=True))
+        return self.send_message(to, jsonpickle.encode(args) + "\n" + jsonpickle.encode(kwargs))
 
     def debug(self, *args, **kwargs) -> Message:
         return self.dump(lampo, *args, **kwargs)
@@ -94,7 +96,7 @@ class Bot:
         :return:
         """
         try:
-            while len(text) > max_length:
+            while len(text) > 1.5 * max_length:
                 index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
                 result = Message.factory(
                     self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
