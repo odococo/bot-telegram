@@ -12,6 +12,7 @@ from utils import WebScraper, Date, Time
 edifici: Dict = {}
 
 tries = 1
+scraper = WebScraper.firefox()
 
 
 @dataclass
@@ -52,12 +53,12 @@ def _get_aula(aula: bs4.element.Tag) -> Dict[str, List[_Lezione]]:
 
 def get_timeline(edificio) -> bool:
     global tries
+    global scraper
 
     if edificio not in edifici or edifici[edificio]['data'].day != Date.by_now().day:
         logging.info("web scraping per {} con {} secondo/i di attesa".format(edificio, tries))
         url = "http://timeline.uninsubria.it/browse.php?sede={}"
 
-        scraper = WebScraper.firefox()
         timeline = scraper.get_page(url.format(edificio), tries)
 
         aule = []
