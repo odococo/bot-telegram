@@ -129,6 +129,7 @@ class Message:
     message_id: int = None
     chat: Union[Chat, Private, Group, SuperGroup, Channel] = None
     when: DateTime = None
+    _when: str = None
     reply_to: 'Message' = None
     original_when: DateTime = None
     original_from_user: User = None
@@ -147,6 +148,7 @@ class Message:
         chat = Chat.factory(message['chat'])
         when = DateTime.from_millis(message['date'])
         self = cls(message_id, chat, when)
+        self._when = str(when)  # per avere la data in output. La serializzazione non funziona
         if 'reply_to_message' in message:
             self.reply_to = Message.factory(message['reply_to_message'])
         if 'forward_date' in message:
@@ -259,7 +261,6 @@ class InlineKeyboard(Keyboard):
 
 @dataclass
 class Update:
-    update: Dict
     update_id: int
     message: Union[Message, TextMessage, Command]
 
@@ -280,4 +281,4 @@ class Update:
 
         message = Message.factory(message)
 
-        return cls(update, update_id, message)
+        return cls(update_id, message)

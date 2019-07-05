@@ -1,9 +1,8 @@
 import datetime
-import json
-import jsonpickle
 import logging
 from typing import Dict, List, Union
 
+import jsonpickle
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -32,7 +31,7 @@ class Bot:
             self.scheduler = BackgroundScheduler()
         self.scheduler.start()
 
-    def __execute(self, method: str, **params) -> Dict:
+    def __execute(self, method: str, **parametri) -> Dict:
         """
         Esegue una httprequest con il metodo
 
@@ -40,7 +39,7 @@ class Bot:
         :param params: parametri del metodo da eseguire
         :return: il contenuto della risposta oppure l'errore
         """
-        request = requests.get(self.url.format(token=self.token, method=method), params=params)
+        request = requests.get(self.url.format(token=self.token, method=method), params=parametri)
         if request.ok:
             return request.json()['result']
         else:
@@ -63,7 +62,8 @@ class Bot:
         self.scheduler.remove_job(job_id)
 
     def dump(self, to: int, *args, **kwargs) -> Message:
-        return self.send_message(to, jsonpickle.encode(args) + "\n" + jsonpickle.encode(kwargs))
+        return self.send_message(to, jsonpickle.encode(args, unpicklable=False) + "\n" +
+                                 jsonpickle.encode(kwargs, unpicklable=False))
 
     def debug(self, *args, **kwargs) -> Message:
         return self.dump(lampo, *args, **kwargs)
@@ -96,7 +96,7 @@ class Bot:
         :return:
         """
         try:
-            while len(text) > 1.5 * max_length:
+            while len(text) > max_length:  # lunghezza massima è 2*max
                 index = text.find("\n", max_length)  # se il messaggio troppo lungo errore oppure perde markup
                 result = Message.factory(
                     self.__execute("sendMessage", chat_id=chat_id, text=text[:index],
