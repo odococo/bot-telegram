@@ -12,7 +12,7 @@ from utils import WebScraper, Date, Time
 edifici: Dict = {}
 
 tries = 1
-scraper = WebScraper.firefox()
+scraper = None
 
 
 @dataclass
@@ -55,6 +55,8 @@ def get_timeline(edificio) -> bool:
     global tries
     global scraper
 
+    scraper = scraper or WebScraper.firefox()
+
     if edificio not in edifici or edifici[edificio]['data'].day != Date.by_now().day:
         logging.info("web scraping per {} con {} secondo/i di attesa".format(edificio, tries))
         url = "http://timeline.uninsubria.it/browse.php?sede={}"
@@ -83,8 +85,6 @@ def get_timeline(edificio) -> bool:
 
 @dataclass
 class Insubria(Command):
-    driver = None
-
     def can_execute(self) -> bool:
         return self.from_user().user_id == lampo or self.from_user().user_id == sara or \
                self.from_user().user_id == donato

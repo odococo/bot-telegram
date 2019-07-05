@@ -1,5 +1,5 @@
 import logging
-from typing import List, Callable
+from typing import List
 
 from commands.commands import Command
 from commands.cron_commands import Cron
