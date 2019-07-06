@@ -4,7 +4,6 @@ from typing import List
 from commands.commands import Command
 from commands.cron_commands import Cron
 from commands.f1_commands import F1
-from commands.insubria_commands import Insubria
 from commands.lampo_commands import Lampo
 from commands.loot_commands import Loot
 from commands.sara_commands import Sara
@@ -19,7 +18,7 @@ def get_commands_list(bot: Bot, update: Update) -> List[Command]:
         Command(bot, update),
         Standard(bot, update),
         F1(bot, update),
-        Insubria(bot, update),
+        # Insubria(bot, update),
         Loot(bot, update),
         Cron(bot, update),
         Sara(bot, update),
