@@ -78,7 +78,7 @@ def get_timeline(edificio) -> bool:
             tries += 1
 
             return False
-        scraper.quit()
+        scraper.quit()  # TODO o lazy o quit
 
     return True
 
@@ -118,30 +118,7 @@ class Insubria(Command):
                 return self.replace("Errore caricamento timeline. Riprova!")
 
             text = "Aule libere per le {}\n".format(when)
-            for aula in edifici[edificio]['aule']:
-                free = True
-                stato = ""
-                if not len(aula['lezioni']):
-                    stato = "libera"
-                for lezione in aula['lezioni']:
-                    if when >= lezione.start:
-                        if not lezione.corso:
-                            stato = "aula studio"
-                        elif when >= lezione.end:
-                            stato = "libera"
-                        else:
-                            stato = "occupata almeno fino alle {}".format(lezione.end)
-                            free = False
-                            break
-                    elif lezione.corso:  # prossima lezione
-                        stato = "libera fino alle {}".format(lezione.start)
-                        break
-                    else:
-                        stato = "aula studio"
-                if free:
-                    text += "\u2705 {} {}\n".format(aula['nome'], stato)  # aula libera per ora
-                else:
-                    text += "\u274c {} {}\n".format(aula['nome'], stato)
+
 
             return self.replace(text)
 

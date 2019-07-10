@@ -131,10 +131,10 @@ class Lampo(Command):
 
         if self.params():
             chat_id = int(self.params()[0])
-            if len(self.params()) == 1:
-                last_message_id = int(self.params()[1])
-            if len(self.params()) == 2:
-                how_many = int(self.params()[2])
+        if len(self.params()) == 2:
+            last_message_id = int(self.params()[1])
+        if len(self.params()) == 3:
+            how_many = int(self.params()[2])
 
         chat_id = chat_id or self.from_chat().chat_id
         last_message_id = last_message_id or self.update.message.message_id
