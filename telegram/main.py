@@ -104,8 +104,8 @@ def main():
     bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
     cron_jobs(bot)
     while True:
-        discard(bot)
         try:
+            discard(bot)
             polling(bot)
         except requests.exceptions.ConnectionError:
             time.sleep(10)
