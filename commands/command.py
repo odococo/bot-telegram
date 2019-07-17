@@ -18,7 +18,7 @@ def get_commands_list(bot: Bot, update: Update) -> List[Command]:
         Command(bot, update),
         Standard(bot, update),
         F1(bot, update),
-        # Insubria(bot, update),
+        #  Insubria(bot, update),
         Loot(bot, update),
         Cron(bot, update),
         Sara(bot, update),
@@ -37,8 +37,6 @@ def get_command(bot: Bot, update: Update, command: str) -> callable:
         if hasattr(command_type, command):
             if command_type.can_execute():
                 c = getattr(command_type, command)
-            else:
-                c = getattr(default, "unauthorized")
             break
         elif command_type == Sara and update.message.from_user.user_id == sara:
             c = getattr(command_type, "tesoro")

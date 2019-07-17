@@ -96,6 +96,6 @@ def list_categories():
 
 
 if __name__ == '__main__':
-    all_channels(sys.argv[0])
+    all_channels(sys.argv[1])
     filter_all()
     standard()

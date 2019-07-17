@@ -102,7 +102,8 @@ def _check_presa(bot: Bot):
 
 
 def main():
-    bot = Bot(sys.argv[0])
+    print(sys.argv)
+    bot = Bot(sys.argv[1])
     cron_jobs(bot)
     while True:
         try:
