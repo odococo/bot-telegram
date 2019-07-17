@@ -1,5 +1,6 @@
 import json
 import re
+import sys
 from typing import Tuple
 
 import requests
@@ -61,9 +62,8 @@ class Link:
         return self.ok and self.category and self.category in categories
 
 
-def all_channels():
-    IPTV('http://halloffame.liveyourlifeandcarpediem.biz:25461/'
-         'get.php?username=zlampo&password=12345&type=m3u_plus&output=ts').filter()
+def all_channels(url):
+    IPTV(url).filter()
 
 
 def filter_all():
@@ -96,6 +96,6 @@ def list_categories():
 
 
 if __name__ == '__main__':
-    all_channels()
+    all_channels(sys.argv[0])
     filter_all()
     standard()

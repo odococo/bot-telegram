@@ -1,5 +1,6 @@
 import logging
 import random
+import sys
 import time
 from typing import List
 
@@ -101,7 +102,7 @@ def _check_presa(bot: Bot):
 
 
 def main():
-    bot = Bot("262354959:AAGZbji0qOxQV-MwzzRqiWJYdPVzkqrbC4Y")
+    bot = Bot(sys.argv[0])
     cron_jobs(bot)
     while True:
         try:
