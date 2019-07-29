@@ -1,0 +1,6 @@
+selenium
+pyvirtualdisplay
+beautifulsoup4
+apscheduler
+jsonpickle
+requests

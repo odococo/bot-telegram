@@ -48,7 +48,8 @@ class Bot:
             self.last_exception = error
             logging.warning(error)
             if error != "Bad Request: message to delete not found":
-                raise Exception(error)
+                pass
+                # raise Exception(error)
 
     def add_cron_job(self, function: callable, single: bool,
                      time_details: Dict[str, Union[int, datetime.datetime]]) -> str:
