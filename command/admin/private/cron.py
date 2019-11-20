@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Set
 
-from commands.standard_commands import Standard
+from command.admin.private.private import Private
 from telegram.wrappers import User, Message
 from utils import Time
 
@@ -9,7 +9,7 @@ jobs: Dict[User, Set[str]] = {}
 
 
 @dataclass
-class Cron(Standard):
+class Cron(Private):
 
     def avvisa(self) -> Message:
         """

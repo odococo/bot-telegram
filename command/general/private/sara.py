@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 
-from commands.command import Command
+from command.general.private.private import Private
 from telegram.bot import params
 from telegram.ids import lampo, sara
 from telegram.wrappers import Message
 
 
 @dataclass
-class Sara(Command):
+class Sara(Private):
     def can_execute(self) -> bool:
-        return self.from_user().user_id == sara
+        return super().can_execute() and self.from_user().user_id == sara
 
     def amore(self) -> Message:
         if not params['presa'] and "presa" in self.update.message.text.lower():

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict
 
-from commands.standard_commands import Standard
+from command.general.private.private import Private
 from telegram.wrappers import InlineKeyboard, InlineButton, Message
 from utils import join, DateTime, get_json
 
@@ -43,7 +43,7 @@ class _Gara:
 
 
 @dataclass
-class F1(Standard):
+class F1(Private):
     url = "https://ergast.com/api/f1/current{}.json"
 
     def _scelta_gara(self, attuale: bool = False, new: bool = True) -> Message:

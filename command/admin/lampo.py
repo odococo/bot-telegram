@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import requests
 
-from commands.commands import Command
+from command.admin.admin import Admin
 from telegram.bot import params
 from telegram.ids import sara, lampo
 from telegram.wrappers import Message
@@ -82,9 +82,9 @@ traduzioni = {
 
 
 @dataclass
-class Lampo(Command):
+class Lampo(Admin):
     def can_execute(self) -> bool:
-        return self.from_user().user_id == lampo
+        return super().can_execute() and self.from_user().user_id == lampo
 
     def amore(self) -> Message:
         return self.bot.forward_message(sara, self.update.message.chat, self.update.message)

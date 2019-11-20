@@ -1,22 +1,11 @@
-import json
 import random
-import unicodedata as ucd
-from dataclasses import dataclass
 
-from commands import command as c
-from commands.commands import Command
-from telegram.wrappers import InlineKeyboard, InlineButton, Message, Private
-from utils import join
+from command.general.general import General
+import telegram.executor as exe
+from telegram.wrappers import Message, InlineKeyboard, InlineButton
 
 
-@dataclass
-class Standard(Command):
-    def can_execute(self) -> bool:
-        return True
-
-    def echo(self) -> Message:
-        return self.answer("To you from you: {}".format(" ".join(self.params())))
-
+class Standard(General):
     def random(self) -> Message:
         """
         Estrae 1 numero random tra min (intero) e max (intero
@@ -68,58 +57,8 @@ class Standard(Command):
 
             return self.replace(text)
 
-    def utf(self) -> Message:
-        string = " ".join(self.params())
-
-        return self.answer(
-            "\n".join(["Input: {}\nCodifica: {}\nCode point: {}\nNome: {}\nCategoria: {}".format(
-                carattere, ord(carattere), json.dumps(carattere), ucd.name(carattere), ucd.category(carattere))
-                for carattere in string]))
-
-    def string(self) -> Message:
-        codice = self.params()[0]
-
-        if codice.isdigit():  # codice unicode
-            return self.answer("Il carattere corrispondente a {} è {}".format(codice, chr(int(codice))))
-        else:  # codifica unicode \u...
-            return self.answer(
-                "Il carattere corrispondente a {} è {}".format(codice, codice.encode('utf-8').decode('unicode_escape')))
-
-    def whoami(self) -> Message:
-        # TODO aggiungere parametro per cercare nel database l'utente
-        user = self.from_user()
-
-        return self.answer(
-            "ID: <code>{}</code>\n"
-            "First name: <code>{}</code>\n"
-            "Last name: <code>{}</code>\n"
-            "Username: <code>{}</code>\n"
-            "<a href='tg://user?id={}'>Contattalo!</a>".format(user.user_id, user.first_name, user.last_name,
-                                                               user.username, user.user_id))
-
-    def whereami(self) -> Message:
-        chat = self.update.message.chat
-        if isinstance(chat, Private):
-            return self.answer(
-                "ID: <code>{}</code>\n"
-                "First name: <code>{}</code>\n"
-                "Last name: <code>{}</code>\n"
-                "Username: <code>{}</code>".format(chat.chat_id, chat.first_name, chat.last_name, chat.username))
-        else:
-            return self.answer(
-                "ID: <code>{}</code>\n"
-                "Title: <code>{}</code>\n"
-                "Tipo: <code>{}</code>\n"
-                "Username: <code>{}</code>".format(chat.chat_id, chat.title, chat.__class__, chat.username))
-
-    def scrivi(self) -> Message:
-        to = int(self.params()[0])
-        text = join(self.params()[1:], " ")
-
-        return self.send(to, text)
-
     def help(self) -> Message:
-        if not self.params():
+        """if not self.params():
             keyboard = InlineKeyboard(2)
             for command_type in c.get_commands_list(self.bot, self.update):
                 if command_type.can_execute():
@@ -138,10 +77,12 @@ class Standard(Command):
         else:
             return self.replace(
                 "Il comando è /{}\n\nPer consultare la documentazion: <code>/doc {}</code>".format(self.params()[1],
-                                                                                                   self.params()[1]))
+                                                                                                   self.params()[1]))"""
+        pass
 
     def doc(self) -> Message:
-        command = self.params()[0]
+        """command = self.params()[0]
         documentazione = c.get_command(self.bot, self.update, command).__doc__
 
-        return self.answer("Comando: /{}\nDocumentazione: {}".format(command, documentazione))
+        return self.answer("Comando: /{}\nDocumentazione: {}".format(command, documentazione))"""
+        pass

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Union
 
 from telegram.bot import Bot
 from telegram.ids import lampo
-from telegram.wrappers import Update, Keyboard, Message, User, Chat
+from telegram.wrappers import Update, Keyboard, Message, User, Chat, Private, Multi
+from utils import join
 
 
 @dataclass
@@ -12,20 +13,22 @@ class Command:
     update: Update
 
     def can_execute(self) -> bool:
-        return False
+        return True
 
     def get_commands(self) -> List[str]:
         return [
             command for command in dir(self)
-            if not command.startswith("_") and not command.startswith("can") and callable(
-                getattr(self, command)) and command in type(self).__dict__
+            if not command.startswith("_") and  # per togliere metodi privati
+            not command.startswith("can") and  # per togliere can_execute
+            callable(getattr(self, command)) and  # per togliere i campi
+            command in type(self).__dict__  # per togliere i metodi della superclasse
         ]
 
     def command(self):
         return self.update.message.command
 
-    def params(self) -> List[str]:
-        return self.update.message.params
+    def params(self, as_string: bool = False) -> Union[List[str], str]:
+        return join(self.update.message.params, " ") if as_string else self.update.message.params
 
     def from_user(self) -> User:
         if self.update.message.reply_to:
@@ -33,7 +36,7 @@ class Command:
         else:
             return self.update.message.from_user
 
-    def from_chat(self) -> Chat:
+    def from_chat(self) -> Union[Private, Multi]:
         return self.update.message.chat
 
     def send(self, to: int, text: str, keyboard: Keyboard = Keyboard()) -> Message:

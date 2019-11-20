@@ -1,5 +1,5 @@
 import datetime as dt
-import logging
+import os
 import time
 from dataclasses import dataclass
 from typing import Union, Any, List, Dict
@@ -226,9 +226,24 @@ def get_page(url: str) -> BeautifulSoup:
     return BeautifulSoup(requests.get(url).content, "html.parser")
 
 
-def get_json(url: str) -> Dict:
-    logging.debug(url)
-    return requests.get(url).json()
+def get_page_from_rapid_api(host: str, params: Dict = None) -> Dict:
+    key = 'e1ecfde8e4msh0bc10f2ab4aea12p195d31jsnb6455b393dff'
+    headers = {
+        'X-RapidAPI-Host': host,
+        'X-RapidAPI-Key': key
+    }
+
+    return get_json(host, params, headers)
+
+
+def get_json(url: str, params: Dict = None, headers: Dict = None) -> Dict:
+    result = requests.get(url, params=params, headers=headers)
+    print(result)
+    if result.ok:
+        return result.json()
+    else:
+        print(result.content)
+        return {}
 
 
 def chunks(l, n):
@@ -239,3 +254,31 @@ def chunks(l, n):
 
 def join(iterable: List[Any], separator: str, prefix: str = "", postfix: str = ""):
     return prefix + separator.join([str(element) for element in iterable if str(element)]) + postfix
+
+
+def list_files(path: str, full_path: bool = True, extension: bool = True) -> List[str]:
+    f = []
+    for root, directories, files in os.walk(path):
+        for file in files:
+            # potrebbe creare stringhe vuote con altrocon file nascosti
+            file = file if extension else file[0:file.rindex('.')]
+            if full_path:
+                f.append(os.path.join(root, file))
+            else:
+                f.append(file)
+
+    return f
+
+
+def list_directories(path: str, full_path: bool = True, extension: bool = True) -> List[str]:
+    d = []
+    for root, directories, files in os.walk(path):
+        for directory in directories:
+            # potrebbe creare stringhe vuote o altro con cartelle nascoste
+            directory = directory if extension else directory[0:directory.rindex('.')]
+            if full_path:
+                d.append(os.path.join(root, directory))
+            else:
+                d.append(directory)
+
+    return d

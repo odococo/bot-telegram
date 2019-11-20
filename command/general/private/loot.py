@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
-from commands.commands import Command
+from command.general.private.private import Private
 from telegram.ids import lampo
 from telegram.wrappers import Message
 
 
 @dataclass
-class Loot(Command):
+class Loot(Private):
     def can_execute(self) -> bool:
         return self.from_user().user_id == lampo
 

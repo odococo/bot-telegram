@@ -4,7 +4,7 @@ from typing import Dict, List
 
 import bs4
 
-from commands.commands import Command
+from command.general.general import General
 from telegram.ids import sara, lampo, donato
 from telegram.wrappers import InlineKeyboard, InlineButton, Message
 from utils import WebScraper, Date, Time
@@ -84,9 +84,9 @@ def get_timeline(edificio) -> bool:
 
 
 @dataclass
-class Insubria(Command):
+class Insubria(General):
     def can_execute(self) -> bool:
-        return self.from_user().user_id == lampo or self.from_user().user_id == sara or \
+        return super().can_execute() and self.from_user().user_id == lampo or self.from_user().user_id == sara or \
                self.from_user().user_id == donato
 
     def aule(self) -> Message:

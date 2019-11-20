@@ -40,16 +40,13 @@ class Bot:
         :return: il contenuto della risposta oppure l'errore
         """
         request = requests.get(self.url.format(token=self.token, method=method), params=parametri)
+        logging.debug(request)
         if request.ok:
             return request.json()['result']
         else:
             logging.warning(request.json())
             error = request.json().get('error', request.json().get('description', request.json()))
             self.last_exception = error
-            logging.warning(error)
-            if error != "Bad Request: message to delete not found":
-                pass
-                # raise Exception(error)
 
     def add_cron_job(self, function: callable, single: bool,
                      time_details: Dict[str, Union[int, datetime.datetime]]) -> str:

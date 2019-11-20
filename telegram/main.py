@@ -6,9 +6,9 @@ from typing import List
 
 import requests
 
-from commands.command import execute
-from commands.insubria_commands import get_timeline
+from command.general.insubria import get_timeline
 from telegram.bot import Bot, params
+from telegram.executor import execute
 from telegram.ids import lampo, sara
 from telegram.wrappers import Command
 from utils import Time, get_json
@@ -52,7 +52,7 @@ def cron_jobs(bot: Bot):
     #                 time_details={'start_date': Time.by_now_with(hour=0, minute=5), 'days': 1})
     bot.add_cron_job(lambda: _get_ip(bot), single=False, time_details={'hours': 4})
     bot.add_cron_job(lambda: _send_memo(bot), single=False,
-                     time_details={'start_date': Time.by_now_with(hour=18, minute=25), 'days': 1})
+                     time_details={'start_date': Time.by_now_with(hour=18, minute=00), 'days': 1})
     _send_reminders(bot)
 
 
@@ -72,7 +72,7 @@ def _get_timelines(edifici: List[str]):
 
 
 def _send_memo(bot: Bot):
-    bot.send_message(sara, "Sono le 18.25")
+    bot.send_message(sara, "Sono le 18.00")
     params['presa'] = False
 
 
