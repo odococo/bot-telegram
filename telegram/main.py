@@ -43,7 +43,7 @@ def discard(bot: Bot):
             if chat_id not in avvisati:
                 avvisati.add(chat_id)
                 bot.send_message(chat_id=chat_id, text="Bot online. Rimanda il comando!")
-    polling(bot, updates[-1].update_id + 1 if len(updates) > 0 else 0)
+    return updates
 
 
 def cron_jobs(bot: Bot):
@@ -107,8 +107,8 @@ def main():
     cron_jobs(bot)
     while True:
         try:
-            discard(bot)
-            polling(bot)
+            updates = discard(bot)
+            polling(bot, updates[-1].update_id + 1 if len(updates) > 0 else 0)
         except requests.exceptions.ConnectionError:
             time.sleep(10)
 

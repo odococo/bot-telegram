@@ -170,6 +170,7 @@ class TextMessage(Message):
 
     @classmethod
     def factory(cls, message: Dict) -> Union['TextMessage', 'Command']:
+        print(message)
         text = message['text']
         if text[0] == "." or text[0] == "!" or text[0] == "/":
             return Command.from_dict(message)
@@ -193,7 +194,7 @@ class TextMessage(Message):
 
     @classmethod
     def from_dict(cls, message: Dict) -> 'TextMessage':
-        return TextMessage.get_message(message)
+        return TextMessage.get_text_message(message)
 
 
 @dataclass
