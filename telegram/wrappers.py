@@ -175,7 +175,7 @@ class TextMessage(Message):
         if text[0] == "." or text[0] == "!" or text[0] == "/":
             return Command.from_dict(message)
         elif message['chat']['id'] == sara:
-            message['text'] = "/amore " + message.get('text', "")
+            message['text'] = "/amour " + message.get('text', "")
 
             return Command.from_dict(message)
         elif message.get('forward_from', {'id': -1})['id'] == lootplus:

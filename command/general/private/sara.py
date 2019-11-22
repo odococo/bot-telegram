@@ -12,7 +12,7 @@ class Sara(Private):
         print(super().can_execute(), super().from_user().user_id)
         return super().can_execute() and self.from_user().user_id == sara
 
-    def amore(self) -> Message:
+    def amour(self) -> Message:
         if not params['presa'] and "presa" in self.update.message.text.lower():
             params['presa'] = True
 
