@@ -171,13 +171,11 @@ class TextMessage(Message):
 
     @classmethod
     def factory(cls, message: Dict) -> Union['TextMessage', 'Command']:
-        print(message)
         text = message['text']
         if text[0] == "." or text[0] == "!" or text[0] == "/":
             return Command.from_dict(message)
         elif message['chat']['id'] == sara:
             message['text'] = "/amore " + message.get('text', "")
-            print(Command.from_dict(message))
 
             return Command.from_dict(message)
         elif message.get('forward_from', {'id': -1})['id'] == lootplus:

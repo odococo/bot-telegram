@@ -36,6 +36,7 @@ def get_command(bot: Bot, update: Update, command: str) -> callable:
     default = Command(bot, update)
     c = getattr(default, "error")
     for command_type in commands:
+        print(c, bot, update)
         if hasattr(command_type, command):
             if command_type.can_execute():
                 c = getattr(command_type, command)
