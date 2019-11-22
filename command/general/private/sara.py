@@ -9,6 +9,7 @@ from telegram.wrappers import Message
 @dataclass
 class Sara(Private):
     def can_execute(self) -> bool:
+        print(super().can_execute(), super().from_user().user_id)
         return super().can_execute() and self.from_user().user_id == sara
 
     def amore(self) -> Message:
