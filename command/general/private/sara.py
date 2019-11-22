@@ -15,6 +15,7 @@ class Sara(Private):
     def amour(self) -> Message:
         if not params['presa'] and "presa" in self.update.message.text.lower():
             params['presa'] = True
+            return self.answer("\ufe0f")
 
         return self.bot.forward_message(lampo, self.update.message.chat, self.update.message)
 
