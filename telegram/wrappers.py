@@ -137,6 +137,7 @@ class Message:
 
     @classmethod
     def factory(cls, message: Dict) -> 'Message':
+        print(message)
         if 'text' in message:
             return TextMessage.factory(message)
         else:
@@ -176,6 +177,7 @@ class TextMessage(Message):
             return Command.from_dict(message)
         elif message['chat']['id'] == sara:
             message['text'] = "/amore " + message.get('text', "")
+            print(Command.from_dict(message))
 
             return Command.from_dict(message)
         elif message.get('forward_from', {'id': -1})['id'] == lootplus:
